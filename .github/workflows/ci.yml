@@ -29,8 +29,11 @@ jobs:
       - name: Build
         run: node scripts/build.js
 
+      # Bare, with no path: the runner's own discovery. A quoted glob is only
+      # expanded by the runner on Node 22+, so `node --test "test/*.test.js"`
+      # passed locally and found nothing at all on 18 and 20.
       - name: Test
-        run: node --test "test/*.test.js"
+        run: node --test
 
       - name: The committed bundle is current
         run: |

@@ -226,7 +226,7 @@ cd character
 
 ```bash
 node scripts/build.js         # -> dist/character.global.js and ui/editor.css
-node --test "test/*.test.js"  # 40 tests, no DOM, no browser
+node --test                   # 45 tests, no DOM, no browser
 open examples/standalone.html
 ```
 
