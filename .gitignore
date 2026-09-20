@@ -1,0 +1,8 @@
+node_modules/
+*.log
+.DS_Store
+
+# `dist/` is NOT ignored, deliberately. It is not a local build output — it is
+# the file a `<script src>` consumer loads, and the reason this package can be
+# used with no toolchain at all. `scripts/build.js` regenerates it from `src/`
+# and `test/editor.test.js` evaluates it, so a stale one cannot pass CI.

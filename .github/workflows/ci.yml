@@ -1,0 +1,41 @@
+# Build the bundle, run the suite, and prove the committed `dist/` is current.
+#
+# That last step is the one worth having. `dist/character.global.js` is checked
+# in because it is what a `<script src>` user loads — so it can go stale in a
+# way nothing else notices. Rebuilding and diffing catches that on every push.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ["18", "20", "22"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      # No `npm install`: this package has no dependencies, and a lockfile-less
+      # install step would be the only thing in CI that could fail for a reason
+      # unrelated to the code.
+      - name: Build
+        run: node scripts/build.js
+
+      - name: Test
+        run: node --test "test/*.test.js"
+
+      - name: The committed bundle is current
+        run: |
+          if ! git diff --quiet -- dist ui/editor.css; then
+            echo "::error::dist/ or ui/editor.css is out of date. Run: node scripts/build.js"
+            git --no-pager diff --stat -- dist ui/editor.css
+            exit 1
+          fi

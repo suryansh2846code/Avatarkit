@@ -1,0 +1,54 @@
+{
+  "name": "character",
+  "version": "0.1.0",
+  "description": "Geometric 3D avatars in SVG: a document format, a renderer, a follow-the-cursor loop, and an editor. No dependencies, no build step required.",
+  "license": "MIT",
+  "author": "Suryansh Singh",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/suryansh2846code/character.git"
+  },
+  "homepage": "https://github.com/suryansh2846code/character#readme",
+  "bugs": {
+    "url": "https://github.com/suryansh2846code/character/issues"
+  },
+  "keywords": [
+    "avatar",
+    "svg",
+    "3d",
+    "identicon",
+    "character",
+    "editor",
+    "follow-cursor",
+    "profile-picture",
+    "generative",
+    "zero-dependency"
+  ],
+  "type": "module",
+  "main": "./src/index.js",
+  "module": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./editor": "./ui/editor.js",
+    "./editor.css": "./ui/editor.css",
+    "./global": "./dist/character.global.js"
+  },
+  "files": [
+    "src",
+    "ui",
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "./ui/editor.css"
+  ],
+  "scripts": {
+    "build": "node scripts/build.js",
+    "test": "node --test \"test/*.test.js\"",
+    "check": "node scripts/build.js && node --test \"test/*.test.js\""
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
