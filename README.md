@@ -301,6 +301,8 @@ cd avatarkit
 node scripts/build.js         # -> dist/avatarkit.global.js and ui/editor.css
 node --test                   # 47 tests, no DOM, no browser
 open examples/standalone.html
+
+npm run stats                 # downloads, stars, traffic — private, local only
 ```
 
 `test/editor.test.js` mounts the editor against a small fake DOM and evaluates

@@ -603,5 +603,27 @@
   if (shared) document.getElementById("build").scrollIntoView();
 })();
 </script>
+
+<!--
+  Cloudflare Web Analytics.
+
+  Privacy-first and cookieless, so it needs no consent banner — which is the
+  reason it is this and not the alternative everyone reaches for first.
+
+  To turn it on: Cloudflare dashboard -> Web Analytics -> add this site, copy
+  the beacon token, paste it below. Left empty, nothing loads and nothing is
+  collected; the page does not ship a request to anyone by default.
+-->
+<script>
+(function () {
+  var TOKEN = "";              // <- paste the beacon token here
+  if (!TOKEN) return;
+  var s = document.createElement("script");
+  s.defer = true;
+  s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+  s.setAttribute("data-cf-beacon", JSON.stringify({ token: TOKEN }));
+  document.head.appendChild(s);
+})();
+</script>
 </body>
 </html>

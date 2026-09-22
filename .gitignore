@@ -15,3 +15,6 @@ docs/og.html
 # scripts/landing-assets.js. Only the PNGs are committed.
 docs/media/*.html
 docs/media/_full.png
+
+# The private usage dashboard, built by scripts/stats.js.
+.local/
