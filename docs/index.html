@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Avatarkit — 3D avatars in SVG that watch your cursor</title>
+<meta name="description" content="Geometric 3D avatars in SVG that follow the pointer. A renderer, a document format and a full editor in 58 kB, with zero dependencies and no build step. MIT.">
+
+<meta property="og:title" content="Avatarkit — 3D avatars that watch your cursor">
+<meta property="og:description" content="Deterministic SVG avatars from any string. Zero dependencies, 58 kB, MIT. Never ship an empty avatar slot again.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://suryansh2846code.github.io/Avatarkit/">
+<meta property="og:image" content="https://suryansh2846code.github.io/Avatarkit/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+
+<style>
+  :root {
+    --bg: #0b0b0d;
+    --panel: #141417;
+    --raised: #1c1c20;
+    --line: #2a2a30;
+    --text: #ecedf0;
+    --dim: #8d8f97;
+    --accent: #e2542a;
+    --accent-soft: #3a1a10;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { overflow-x: hidden; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.6 var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { width: min(1080px, calc(100% - 48px)); margin: 0 auto; }
+
+  a { color: inherit; }
+
+  /* ── nav ──────────────────────────────────────────────────────────── */
+
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  nav .wrap { display: flex; align-items: center; gap: 16px; height: 60px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 640; letter-spacing: -0.01em; }
+  .brand img { width: 28px; height: 28px; display: block; border-radius: 6px; }
+  nav .spacer { flex: 1; }
+  .nav-link {
+    color: var(--dim); text-decoration: none; font-size: 14px; font-weight: 500;
+    padding: 7px 12px; border-radius: 8px;
+  }
+  .nav-link:hover { color: var(--text); background: var(--raised); }
+  .nav-star {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--text); color: var(--bg);
+    font-size: 14px; font-weight: 640; text-decoration: none;
+    padding: 8px 14px; border-radius: 9px;
+  }
+  .nav-star:hover { opacity: 0.9; }
+  @media (max-width: 640px) { .nav-hide { display: none; } }
+
+  /* ── hero ─────────────────────────────────────────────────────────── */
+
+  header { padding: 64px 0 40px; text-align: center; }
+
+  .watchers {
+    display: flex; justify-content: center; align-items: flex-end;
+    gap: clamp(6px, 2vw, 20px); margin-bottom: 40px; flex-wrap: nowrap;
+  }
+  .watchers > div { width: clamp(52px, 10vw, 104px); aspect-ratio: 1; flex: none; }
+  .watchers > div:nth-child(even) { margin-bottom: clamp(10px, 3vw, 28px); }
+
+  h1 {
+    font-size: clamp(34px, 6.2vw, 62px); line-height: 1.04;
+    letter-spacing: -0.035em; font-weight: 680; margin: 0 0 18px;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+
+  .lede {
+    font-size: clamp(16px, 2.2vw, 20px); color: var(--dim);
+    max-width: 620px; margin: 0 auto 32px; line-height: 1.55;
+  }
+
+  .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; align-items: center; }
+
+  .install {
+    display: inline-flex; align-items: center; gap: 12px;
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 11px; padding: 11px 12px 11px 18px;
+    font-family: var(--mono); font-size: 15px;
+  }
+  .install .dollar { color: var(--dim); }
+  .install button {
+    background: var(--raised); color: var(--dim); border: 1px solid var(--line);
+    border-radius: 7px; padding: 6px 11px; font: 500 12px var(--sans);
+    cursor: pointer; transition: color .15s, background .15s;
+  }
+  .install button:hover { color: var(--text); background: var(--line); }
+  .install button.done { color: #6ee7a8; border-color: #2c5a41; }
+
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid var(--line); border-radius: 11px;
+    padding: 12px 18px; text-decoration: none; font-weight: 560; font-size: 15px;
+  }
+  .btn-ghost:hover { background: var(--panel); }
+
+  .facts {
+    display: flex; gap: 10px 26px; justify-content: center; flex-wrap: wrap;
+    margin-top: 34px; color: var(--dim); font-size: 14px;
+  }
+  .facts b { color: var(--text); font-weight: 620; }
+
+  /* ── sections ─────────────────────────────────────────────────────── */
+
+  section { padding: 76px 0; border-top: 1px solid var(--line); }
+  .kicker {
+    font: 600 12px/1 var(--sans); letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 14px;
+  }
+  h2 {
+    font-size: clamp(25px, 3.6vw, 36px); letter-spacing: -0.025em;
+    font-weight: 660; margin: 0 0 14px; line-height: 1.15;
+  }
+  .sub { color: var(--dim); max-width: 640px; margin: 0 0 36px; font-size: 17px; }
+
+  /* ── seed ─────────────────────────────────────────────────────────── */
+
+  .seed-grid {
+    display: grid; grid-template-columns: 1fr 260px; gap: 40px; align-items: center;
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 16px; padding: 32px;
+  }
+  @media (max-width: 760px) { .seed-grid { grid-template-columns: 1fr; gap: 28px; padding: 22px; } }
+  /* A grid item's default `min-width: auto` is its min-content width, and the
+     code block below is one unbreakable pre-formatted line — so without this the
+     column is sized by that line and the whole page scrolls sideways on a phone.
+     The block scrolls inside itself instead, which is what `overflow-x` is for. */
+  .seed-grid > * { min-width: 0; }
+
+  .seed-field { display: flex; gap: 10px; margin-bottom: 18px; }
+  .seed-field input {
+    flex: 1; min-width: 0; background: var(--bg); color: var(--text);
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 13px 15px; font: 15px var(--mono);
+  }
+  .seed-field input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .seed-field button {
+    background: var(--raised); color: var(--text); border: 1px solid var(--line);
+    border-radius: 10px; padding: 0 16px; font: 560 14px var(--sans); cursor: pointer; white-space: nowrap;
+  }
+  .seed-field button:hover { background: var(--line); }
+
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .chip {
+    background: var(--raised); border: 1px solid var(--line); color: var(--dim);
+    border-radius: 999px; padding: 5px 13px; font: 500 13px var(--mono); cursor: pointer;
+  }
+  .chip:hover { color: var(--text); border-color: var(--accent); }
+
+  .seed-code {
+    font: 13px/1.7 var(--mono); color: var(--dim);
+    background: var(--bg); border: 1px solid var(--line);
+    border-radius: 10px; padding: 14px 16px; overflow-x: auto; white-space: pre;
+  }
+  .seed-code b { color: var(--accent); font-weight: 400; }
+
+  .seed-out { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .seed-pair { display: flex; gap: 14px; }
+  .seed-pair > div { width: 104px; height: 104px; }
+  .seed-note { color: var(--dim); font-size: 13px; text-align: center; line-height: 1.5; }
+
+  /* ── rail ─────────────────────────────────────────────────────────── */
+
+  .rail-box {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 16px; padding: 28px 0; overflow: hidden;
+  }
+  .rail { display: flex; gap: 12px; padding: 0 20px; flex-wrap: wrap; justify-content: center; }
+  .rail > div { width: 46px; height: 46px; flex: none; }
+
+  .meters { display: flex; gap: 14px 28px; justify-content: center; margin-top: 26px; flex-wrap: wrap; padding: 0 20px; }
+  .meter { text-align: center; }
+  .meter .v { font: 640 24px var(--mono); letter-spacing: -0.02em; display: block; }
+  .meter .k { font-size: 12px; color: var(--dim); letter-spacing: 0.04em; text-transform: uppercase; }
+
+  /* ── editor ───────────────────────────────────────────────────────── */
+
+  #editor { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
+  .editor-foot {
+    margin-top: 18px; color: var(--dim); font-size: 14px;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .editor-foot svg { flex: none; margin-top: 3px; }
+
+  /* ── install / code ───────────────────────────────────────────────── */
+
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 20px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 14px; padding: 24px;
+  }
+  .card h3 { margin: 0 0 8px; font-size: 16px; font-weight: 620; letter-spacing: -0.01em; }
+  .card p { margin: 0 0 16px; color: var(--dim); font-size: 14px; line-height: 1.6; }
+  pre {
+    margin: 0; background: var(--bg); border: 1px solid var(--line);
+    border-radius: 10px; padding: 15px; overflow-x: auto;
+    font: 13px/1.65 var(--mono); color: #cfd2d9;
+  }
+  pre .c { color: #6b6e78; }
+  pre .s { color: #9fd0a6; }
+  pre .k { color: #d59bdc; }
+  pre .f { color: #8fb5f0; }
+
+  /* ── how ──────────────────────────────────────────────────────────── */
+
+  .how { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 32px; }
+  .how h3 { font-size: 16px; margin: 0 0 10px; font-weight: 620; }
+  .how p { color: var(--dim); font-size: 15px; margin: 0; line-height: 1.65; }
+  .how .n {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--accent-soft); color: var(--accent);
+    font: 640 13px var(--mono); margin-bottom: 14px;
+  }
+
+  /* ── footer ───────────────────────────────────────────────────────── */
+
+  footer { border-top: 1px solid var(--line); padding: 48px 0 64px; color: var(--dim); font-size: 14px; }
+  .foot-row { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+  footer a { color: var(--dim); text-decoration: none; }
+  footer a:hover { color: var(--text); }
+  .foot-row .spacer { flex: 1; }
+
+  .fallback {
+    display: none; text-align: center; color: var(--dim);
+    border: 1px dashed var(--line); border-radius: 12px; padding: 20px; margin-top: 24px;
+  }
+  .no-lib .fallback { display: block; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <span class="brand"><img src="favicon.svg" width="28" height="28" alt="">Avatarkit</span>
+    <span class="spacer"></span>
+    <a class="nav-link nav-hide" href="#try">Try it</a>
+    <a class="nav-link nav-hide" href="#build">Build one</a>
+    <a class="nav-link nav-hide" href="#install">Install</a>
+    <a class="nav-link" href="https://www.npmjs.com/package/avatarkit">npm</a>
+    <a class="nav-star" href="https://github.com/suryansh2846code/Avatarkit">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 005.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.23.49-2.7-1.07-2.7-1.07-.36-.93-.89-1.18-.89-1.18-.73-.5.05-.49.05-.49.81.06 1.23.83 1.23.83.72 1.23 1.89.87 2.35.67.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 014 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      Star
+    </a>
+  </div>
+</nav>
+
+<header>
+  <div class="wrap">
+    <div class="watchers" id="watchers" aria-hidden="true"></div>
+
+    <h1>Avatars that <em>watch your cursor</em></h1>
+    <p class="lede">
+      Geometric 3D characters in plain SVG, generated from any string you already
+      have. Zero dependencies, no build step, and an editor your users can drive.
+    </p>
+
+    <div class="cta">
+      <span class="install">
+        <span class="dollar">$</span>
+        <code id="cmd">npm i avatarkit</code>
+        <button id="copy" type="button">Copy</button>
+      </span>
+      <a class="btn-ghost" href="#build">Build one now →</a>
+    </div>
+
+    <p class="facts">
+      <span><b>0</b> dependencies</span>
+      <span><b>58 kB</b> gzipped</span>
+      <span><b>MIT</b> licensed</span>
+      <span><b>TypeScript</b> types included</span>
+    </p>
+
+    <div class="fallback">
+      Avatarkit could not load from the CDN, so the demos on this page are asleep.
+      The package itself is fine — <code>npm i avatarkit</code>.
+    </div>
+  </div>
+</header>
+
+<section id="try">
+  <div class="wrap">
+    <p class="kicker">Deterministic</p>
+    <h2>Any string is already an avatar</h2>
+    <p class="sub">
+      An email, a user id, an agent name. The same seed gives the same character
+      every time, on every machine, for ever — so you can compute it at render
+      time instead of storing it.
+    </p>
+
+    <div class="seed-grid">
+      <div>
+        <div class="seed-field">
+          <input id="seed" value="ada@example.com" aria-label="Seed" spellcheck="false" autocomplete="off">
+          <button id="rnd" type="button">Surprise me</button>
+        </div>
+        <div class="chips" id="chips"></div>
+        <div class="seed-code">generateScene(<b id="echo">"ada@example.com"</b>)</div>
+      </div>
+      <div class="seed-out">
+        <div class="seed-pair">
+          <div id="seedA"></div>
+          <div id="seedB"></div>
+        </div>
+        <p class="seed-note">Two independent renders.<br>Same seed, same character.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">Cheap at scale</p>
+    <h2>Thirty of them cost one pointer read</h2>
+    <p class="sub">
+      Every avatar on a page shares one <code>pointermove</code> listener and one
+      <code>requestAnimationFrame</code> loop. The loop parks itself for a hidden
+      tab, an off-screen element, or <code>prefers-reduced-motion</code>.
+    </p>
+
+    <div class="rail-box">
+      <div class="rail" id="rail"></div>
+      <div class="meters">
+        <span class="meter"><span class="v" id="fps">—</span><span class="k">fps</span></span>
+        <span class="meter"><span class="v" id="count">—</span><span class="k">live avatars</span></span>
+        <span class="meter"><span class="v">1</span><span class="k">rAF loop</span></span>
+        <span class="meter"><span class="v">1</span><span class="k">listener</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="build">
+  <div class="wrap">
+    <p class="kicker">The editor, in one function call</p>
+    <h2>Build a character, then take it with you</h2>
+    <p class="sub">
+      This is <code>mountEditor()</code> — the whole thing, framework-free, the
+      same call you would make in your own app. Export it as SVG or PNG, or copy
+      a link that reopens exactly what you made.
+    </p>
+
+    <div id="editor"></div>
+
+    <p class="editor-foot">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.5v4M8 4.6v.6"/></svg>
+      <span>Everything here is the published package running in your browser. Nothing is
+      uploaded, and nothing is stored — a character is a JSON document that fits in a URL.</span>
+    </p>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <p class="kicker">Install</p>
+    <h2>Three lines to the same place</h2>
+    <p class="sub">Pick whichever fits your stack. They ship identical code.</p>
+
+    <div class="cols">
+      <div class="card">
+        <h3>npm</h3>
+        <p>ESM, with TypeScript declarations in the box.</p>
+<pre><span class="c">$</span> npm i avatarkit
+
+<span class="k">import</span> { createAvatar, generateScene }
+  <span class="k">from</span> <span class="s">"avatarkit"</span>;
+
+<span class="f">createAvatar</span>(<span class="s">"#slot"</span>,
+  <span class="f">generateScene</span>(user.email));</pre>
+      </div>
+
+      <div class="card">
+        <h3>A script tag</h3>
+        <p>No toolchain at all. One file, one global.</p>
+<pre><span class="k">&lt;script</span> src=<span class="s">"https://unpkg.com/avatarkit"</span><span class="k">&gt;&lt;/script&gt;</span>
+
+<span class="k">&lt;script&gt;</span>
+  Avatarkit.<span class="f">createAvatar</span>(<span class="s">"#slot"</span>,
+    Avatarkit.<span class="f">generateScene</span>(<span class="s">"hello"</span>));
+<span class="k">&lt;/script&gt;</span></pre>
+      </div>
+
+      <div class="card">
+        <h3>React, Vue, anything</h3>
+        <p>No wrapper package. A ref and an effect is the whole integration.</p>
+<pre><span class="f">useEffect</span>(() =&gt; {
+  <span class="k">const</span> a = <span class="f">createAvatar</span>(ref.current,
+    <span class="f">generateScene</span>(seed));
+  <span class="k">return</span> () =&gt; a.<span class="f">destroy</span>();
+}, [seed]);</pre>
+      </div>
+
+      <div class="card">
+        <h3>On a server, or in a list</h3>
+        <p>No DOM needed. A string the browser caches as an image.</p>
+<pre><span class="k">const</span> svg = <span class="f">renderToString</span>(doc, {
+  size: <span class="s">48</span>,
+  idPrefix: <span class="s">"u1"</span>,
+});</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">How it works</p>
+    <h2>Convex solids, not a mesh</h2>
+
+    <div class="how">
+      <div>
+        <span class="n">1</span>
+        <h3>Primitives</h3>
+        <p>
+          Spheres, capsules, rounded boxes, cones and wedges — each with a
+          position, a size, a depth and three rotations. Concave characters are
+          built by stacking convex parts, which is also the only vocabulary the
+          editor exposes.
+        </p>
+      </div>
+      <div>
+        <span class="n">2</span>
+        <h3>Hulls</h3>
+        <p>
+          Every frame, each part's surface points are rotated, projected through a
+          pinhole camera, and reduced to a convex hull — the exact silhouette of a
+          convex solid under any projection. No triangles, no WebGL.
+        </p>
+      </div>
+      <div>
+        <span class="n">3</span>
+        <h3>Seams</h3>
+        <p>
+          Hulls are painted back to front, fill then outline, so a nearer part's
+          outline lands across a farther part's fill. That seam is the whole visual
+          signature — it is what makes a cat read as a head with ears behind it.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-row">
+    <span>MIT © Suryansh Singh</span>
+    <span class="spacer"></span>
+    <a href="https://github.com/suryansh2846code/Avatarkit">GitHub</a>
+    <a href="https://www.npmjs.com/package/avatarkit">npm</a>
+    <a href="https://github.com/suryansh2846code/Avatarkit/blob/main/CHANGELOG.md">Changelog</a>
+    <a href="https://github.com/suryansh2846code/Avatarkit#readme">Docs</a>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/avatarkit@0.2.0"></script>
+<script>
+(function () {
+  "use strict";
+
+  if (!window.Avatarkit) { document.body.classList.add("no-lib"); return; }
+  var A = window.Avatarkit;
+
+  // A coarse pointer never sends the pointermove the follow loop listens for, so
+  // on a phone every avatar on this page would sit dead still — on a page whose
+  // entire headline is that they move. These get a slow wander instead, driven
+  // through the same public setPose() a host would use for its own animation.
+  var coarse = window.matchMedia("(pointer: coarse)").matches;
+  var still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var wander = [];
+
+  function mount(el, doc, opts) {
+    var inst = A.createAvatar(el, doc, opts || {});
+    if (coarse && !still) wander.push({ inst: inst, phase: wander.length * 1.7 });
+    return inst;
+  }
+
+  // ── hero ──────────────────────────────────────────────────────────────
+  var HERO = ["avatarkit", "ada@example.com", "agent:inbox", "cat", "design-system", "hello world", "ship it"];
+  var watchers = document.getElementById("watchers");
+  // Narrow screens cannot fit seven without shrinking them into illegibility.
+  var heroCount = window.innerWidth < 560 ? 4 : window.innerWidth < 860 ? 5 : 7;
+  HERO.slice(0, heroCount).forEach(function (seed) {
+    var d = document.createElement("div");
+    watchers.appendChild(d);
+    mount(d, A.generateScene(seed), { follow: { scope: "window", yawRange: 34, pitchRange: 22 }, title: seed });
+  });
+
+  // ── copy ──────────────────────────────────────────────────────────────
+  var copy = document.getElementById("copy");
+  copy.addEventListener("click", function () {
+    navigator.clipboard.writeText("npm i avatarkit").then(function () {
+      copy.textContent = "Copied";
+      copy.classList.add("done");
+      setTimeout(function () { copy.textContent = "Copy"; copy.classList.remove("done"); }, 1600);
+    });
+  });
+
+  // ── the seed demo ─────────────────────────────────────────────────────
+  // Two independent instances from one seed, side by side. The claim is
+  // determinism, and two renders that match is the only way to show it rather
+  // than assert it.
+  var seedInput = document.getElementById("seed");
+  var echo = document.getElementById("echo");
+  var a = mount(document.getElementById("seedA"), A.generateScene(seedInput.value), { follow: { scope: "window" } });
+  var b = mount(document.getElementById("seedB"), A.generateScene(seedInput.value), { follow: { scope: "window" } });
+
+  function applySeed(v) {
+    var doc = A.generateScene(v);
+    a.setDocument(doc);
+    b.setDocument(doc);
+    echo.textContent = JSON.stringify(v);
+  }
+  seedInput.addEventListener("input", function () { applySeed(seedInput.value); });
+
+  ["ada@example.com", "u_8812", "agent:inbox", "@suryansh", "order-4471"].forEach(function (s) {
+    var c = document.createElement("button");
+    c.className = "chip";
+    c.type = "button";
+    c.textContent = s;
+    c.addEventListener("click", function () { seedInput.value = s; applySeed(s); });
+    document.getElementById("chips").appendChild(c);
+  });
+
+  document.getElementById("rnd").addEventListener("click", function () {
+    var s = Math.random().toString(36).slice(2, 9);
+    seedInput.value = s;
+    applySeed(s);
+  });
+
+  // ── the rail ──────────────────────────────────────────────────────────
+  var rail = document.getElementById("rail");
+  var RAIL_N = 30;
+  for (var i = 0; i < RAIL_N; i++) {
+    var d = document.createElement("div");
+    rail.appendChild(d);
+    mount(d, A.generateScene("rail:" + i), { follow: { scope: "window", yawRange: 30 }, title: "rail " + i });
+  }
+  document.getElementById("count").textContent = String(RAIL_N + heroCount + 2);
+
+  // ── fps ───────────────────────────────────────────────────────────────
+  // Measured over a rolling half-second: long enough to read, short enough that
+  // the meter is showing a real number before a visitor has finished scrolling
+  // to it. Averaging since page load would instead hide the stall you care about.
+  var fpsEl = document.getElementById("fps");
+  var frames = 0;
+  var since = performance.now();
+  (function tick(t) {
+    frames++;
+    if (t - since >= 500) {
+      fpsEl.textContent = String(Math.round((frames * 1000) / (t - since)));
+      frames = 0;
+      since = t;
+    }
+    // The wander is driven from this same loop rather than its own, so a phone
+    // runs one rAF for the page, exactly as the desktop story claims.
+    if (wander.length) {
+      var s = t / 1000;
+      for (var j = 0; j < wander.length; j++) {
+        var w = wander[j];
+        w.inst.setPose({
+          yaw: Math.sin(s * 0.55 + w.phase) * 0.28,
+          pitch: Math.sin(s * 0.37 + w.phase * 1.4) * 0.14,
+        });
+      }
+    }
+    requestAnimationFrame(tick);
+  })(performance.now());
+
+  // ── the editor ────────────────────────────────────────────────────────
+  // A shared link wins over the default, so a link someone posts opens on the
+  // character they made rather than on ours.
+  var shared = A.fromURL(location.href);
+  A.mountEditor("#editor", {
+    document: shared || A.generateScene("avatarkit"),
+    actions: ["randomize", "reset", "export", "share"],
+    shareBase: location.origin + location.pathname,
+    storageKey: "avatarkit.demo.presets",
+  });
+  if (shared) document.getElementById("build").scrollIntoView();
+})();
+</script>
+</body>
+</html>
