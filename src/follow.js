@@ -2,11 +2,11 @@
  * Look at the cursor.
  *
  * One `pointermove` listener and one `requestAnimationFrame` loop for the whole
- * page, shared by every character on it. That is not micro-optimisation: an
- * sidebar draws eight characters, a member list draws thirty, and a
+ * page, shared by every avatar on it. That is not micro-optimisation: an
+ * sidebar draws eight avatars, a member list draws thirty, and a
  * per-instance listener plus a per-instance rAF means thirty callbacks and
  * thirty layout reads per pointer move. The shared loop reads the pointer once
- * and each character does arithmetic against a rect it already has.
+ * and each avatar does arithmetic against a rect it already has.
  *
  * The motion itself is a damped spring rather than an ease: a spring has no
  * duration, so a pointer that changes direction mid-flight is followed from
@@ -17,9 +17,9 @@
  * Three behaviours that are easy to leave out and immediately missed:
  *
  *   - **Rest.** After the pointer has been still for a while the head returns
- *     to its authored pose instead of staring at the last known position. A
- *     character frozen mid-glance looks broken, not attentive.
- *   - **Blink.** Staggered per instance. A rail of characters blinking in
+ *     to its authored pose instead of staring at the last known position. An
+ *     avatar frozen mid-glance looks broken, not attentive.
+ *   - **Blink.** Staggered per instance. A rail of avatars blinking in
  *     unison is unsettling in a way people notice without being able to say why.
  *   - **Stop when nobody is looking.** Hidden tab, off-screen element, or
  *     `prefers-reduced-motion` — the loop stops entirely rather than spinning.
@@ -34,13 +34,13 @@ let pointer = null;           // {x, y} in client coordinates, or null before fi
 let pointerAt = 0;            // timestamp of the last real pointer movement
 let listening = false;
 
-/** How long the pointer must be still before characters drift back to rest. */
+/** How long the pointer must be still before avatars drift back to rest. */
 const REST_AFTER_MS = 2600;
 
 /**
- * How far away the pointer has to be for a character to turn as far as it can.
+ * How far away the pointer has to be for an avatar to turn as far as it can.
  *
- * Scaled off the character's own size, but clamped — and the clamp is the whole
+ * Scaled off the avatar's own size, but clamped — and the clamp is the whole
  * point. Reach was once *only* `size * 2.2`, which for a 34px avatar in a rail
  * is 75 pixels: the cursor cleared full deflection almost the instant it left
  * the avatar, so across a 1400px window the head sat pinned at its limit and
@@ -77,7 +77,7 @@ function onPointerMove(e) {
 
 function onPointerLeave() {
   // Not null — null means "never moved". Leaving the window should send every
-  // character back to rest, which the idle path already does.
+  // avatar back to rest, which the idle path already does.
   pointerAt = 0;
 }
 
@@ -117,7 +117,7 @@ function tick(t) {
 }
 
 /**
- * A single character's follow state.
+ * A single avatar's follow state.
  *
  * `onPose` is called only on frames where the pose actually changed enough to
  * be worth a re-render — below a tenth of a degree there is nothing on screen
@@ -174,11 +174,11 @@ export class FollowController {
   }
 
   /**
-   * An off-screen character is not worth a frame.
+   * An off-screen avatar is not worth a frame.
    *
    * The rail keeps every agent mounted while only a few are scrolled into view,
    * and IntersectionObserver is the difference between "the loop costs what the
-   * visible characters cost" and "the loop costs what every character ever
+   * visible avatars cost" and "the loop costs what every avatar ever
    * created costs".
    */
   _observe() {
@@ -225,7 +225,7 @@ export class FollowController {
     // behaviour, checked by eye against a pitch sweep — the second one was
     // negated here for a while on the strength of an argument about which way
     // the top of the head moves, which is the opposite of what a viewer sees.
-    // `character/test` asserts this against the drawn face, not against the
+    // `avatarkit/test` asserts this against the drawn face, not against the
     // sign of the number, so the mistake cannot be re-derived.
     const targetYaw = nx * deg(this.cfg.yawRange);
     const targetPitch = ny * deg(this.cfg.pitchRange);
@@ -250,13 +250,13 @@ export class FollowController {
     if (this.cfg.blink) moved += this._blink(t);
 
     // A twentieth of a degree of yaw is the threshold below which re-projecting
-    // the character cannot change a single rounded path coordinate.
+    // the avatar cannot change a single rounded path coordinate.
     if (moved > 0.0009) {
       if (this.onPose) this.onPose(this.pose);
       return true;
     }
     // Still worth a frame if a blink is pending, so the loop does not shut down
-    // one second before every character was due to blink.
+    // one second before every avatar was due to blink.
     return this.cfg.blink && t < this.blinkAt + 400;
   }
 

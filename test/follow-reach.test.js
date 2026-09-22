@@ -1,9 +1,9 @@
 /**
- * A character must have somewhere to travel between "resting" and "as far as
+ * An avatar must have somewhere to travel between "resting" and "as far as
  * it turns".
  *
  * This is the bug that made the feature read as broken while every other test
- * passed. The reach was derived purely from the character's own size, so a 34px
+ * passed. The reach was derived purely from the avatar's own size, so a 34px
  * avatar in a rail hit full deflection 75 pixels away — across a real window
  * the head sat pinned at its limit and flicked between extremes as the pointer
  * crossed the centre line. Nothing in between was ever drawn, so a perfectly

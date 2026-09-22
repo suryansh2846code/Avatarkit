@@ -3,7 +3,7 @@
  *
  * Everything here is plain arrays and plain numbers. No classes, no allocation
  * discipline beyond "don't allocate in the hot loop if it is easy not to" —
- * a character is a few hundred points, not a scene graph, and the renderer runs
+ * an avatar is a few hundred points, not a scene graph, and the renderer runs
  * at pointer-move rate rather than per frame.
  *
  * Convention, fixed once so nothing downstream has to guess:
@@ -54,7 +54,7 @@ export function matRotZ(t) {
  * The order matters and this one was chosen on purpose: yaw last means the
  * "turn to look at the cursor" rotation composes on top of whatever pose the
  * part was authored in, instead of tumbling it. Change the order and every
- * saved character with a non-zero part rotation moves.
+ * saved avatar with a non-zero part rotation moves.
  */
 export function matEuler(rx, ry, rz) {
   return matMul(matRotY(ry), matMul(matRotX(rx), matRotZ(rz)));
@@ -89,7 +89,7 @@ export function vNorm(a) {
 /**
  * A tiny deterministic PRNG (mulberry32) plus a string hash to seed it.
  *
- * Deterministic because an agent's generated character must be the same on
+ * Deterministic because an agent's generated avatar must be the same on
  * every launch and on every machine. `Math.random()` here would mean an agent
  * that looks different after a refresh, which reads as a bug about identity,
  * not as variety.

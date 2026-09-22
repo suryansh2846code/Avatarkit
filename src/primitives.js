@@ -9,7 +9,7 @@
  * Two rules every primitive in this file obeys:
  *
  *   1. **It is convex.** The silhouette shortcut in `hull.js` is only correct
- *      for convex solids. A concave character is built by stacking convex parts
+ *      for convex solids. A concave avatar is built by stacking convex parts
  *      — ears are separate parts, not a notch cut out of a head.
  *   2. **It samples its own extremes.** The hull can only find a corner that
  *      was handed to it, so polyhedra return exactly their vertices and curved
@@ -19,7 +19,7 @@
  * Sample counts are tuned so that the worst-case gap between two adjacent
  * silhouette points stays under a third of a pixel at a 512px export — the
  * point below which a curve stops looking like a curve and starts looking
- * slightly soft. They are deliberately not adaptive: a character has a handful
+ * slightly soft. They are deliberately not adaptive: an avatar has a handful
  * of parts, the clouds are cached, and a fixed count keeps `toSVG()` output
  * byte-identical for the same document, which is what makes the SVG diffable
  * and the tests worth writing.

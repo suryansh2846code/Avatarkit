@@ -12,8 +12,8 @@
  * to know anything about the product it has been dropped into.
  *
  * The defaults are dark because the editor is a tool panel that sits beside a
- * bright preview; a light panel next to a coloured character makes judging the
- * character's own contrast impossible.
+ * bright preview; a light panel next to a coloured avatar makes judging the
+ * avatar's own contrast impossible.
  *
  * **No backticks below this line, not even inside a CSS comment.** The whole
  * stylesheet is one template literal, so a backtick closes it and everything
@@ -55,9 +55,9 @@ export const EDITOR_CSS = `
 }
 .ce-frame svg { display: block; width: 100%; height: 100%; }
 /* The one control that sits ON the artwork, so it cannot take its colours from
-   the theme: a character can be any colour, including the accent. It is opaque
+   the theme: an avatar can be any colour, including the accent. It is opaque
    and always the same dark chip, and it opts out of the pressed-button styling
-   every other button here uses — gold-on-gold over a pale character was
+   every other button here uses — gold-on-gold over a pale avatar was
    unreadable, and its own switch already says which state it is in. */
 .ce-follow, .ce button.ce-follow[aria-pressed="true"] {
   position: absolute; top: 12px; right: 12px; z-index: 2;
@@ -141,7 +141,7 @@ export const EDITOR_CSS = `
 .ce button svg { width: 15px; height: 15px; }
 /* ...but a chip and a tab are buttons whose contents are NOT icons. The icon
    rule above is one class and two type selectors, which outranks a plain
-   .ce-chip svg -- so every character thumbnail was rendered at 15px inside a
+   .ce-chip svg -- so every avatar thumbnail was rendered at 15px inside a
    71px chip. The faces looked unreadably small and the cause looked like the
    geometry, which it was not. Both of these are deliberately more specific. */
 .ce button.ce-chip svg { width: 100%; height: 100%; }

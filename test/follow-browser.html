@@ -5,21 +5,21 @@
 #out{position:absolute;left:20px;top:20px;white-space:pre}</style>
 </head><body>
 <div id="a"></div><pre id="out">running</pre>
-<script src="../dist/character.global.js"></script>
+<script src="../dist/avatarkit.global.js"></script>
 <script>
 /**
- * Does the character actually turn toward the pointer?
+ * Does the avatar actually turn toward the pointer?
  *
  * Asserted on the rendered path, not on the controller's internal numbers. The
  * pose can be perfectly correct while nothing reaches the screen — that is
  * exactly what a broken redraw looks like — so the only honest check is that
  * the SVG the browser is painting changed, and changed in the right direction.
  */
-const doc = Character.generateScene("follow-test");
+const doc = Avatarkit.generateScene("follow-test");
 doc.scene.follow = Object.assign({}, doc.scene.follow, {
   enabled: true, scope: "window", yawRange: 40, pitchRange: 24, stiffness: 14, blink: false,
 });
-const inst = Character.createCharacter("#a", doc);
+const inst = Avatarkit.createAvatar("#a", doc);
 const el = document.querySelector("#a svg");
 const out = document.getElementById("out");
 const log = [];
@@ -40,7 +40,7 @@ function move(x, y) {
 }
 
 let frames = 0;
-const probe = new Character.FollowController(
+const probe = new Avatarkit.FollowController(
   document.getElementById("a"),
   { enabled: true, scope: "window", yawRange: 40, pitchRange: 24, stiffness: 14, blink: false },
   () => { frames++; },
@@ -59,7 +59,7 @@ setTimeout(() => {
     log.push("probe pose:       " + JSON.stringify(probe.pose));
     log.push("probe cfg scope:  " + probe.cfg.scope + " yaw " + probe.cfg.yawRange);
     log.push("probe enabled:    " + probe.enabled + " visible " + probe.visible);
-    log.push("frames:           " + frames + " events " + seen + " active " + Character._activeCount());
+    log.push("frames:           " + frames + " events " + seen + " active " + Avatarkit._activeCount());
     log.push("reduced motion:   " + matchMedia("(prefers-reduced-motion: reduce)").matches);
     log.push("rAF available:    " + (typeof requestAnimationFrame === "function"));
     log.push("changed on move:  " + (el.innerHTML !== at0));

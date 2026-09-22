@@ -40,7 +40,7 @@ import { PALETTES, palette, rgbToHex, hexToRgb } from "../src/palettes.js";
 import { SHAPES, SHAPE_LABELS } from "../src/primitives.js";
 import { PRESETS, applyPreset } from "../src/presets.js";
 import { randomScene } from "../src/generate.js";
-import { createCharacter, renderToString } from "../src/renderer.js";
+import { createAvatar, renderToString } from "../src/renderer.js";
 import { encode, decode } from "../src/codec.js";
 import { downloadSVG, downloadPNG } from "../src/png.js";
 import { EDITOR_CSS } from "./editor-style.js";
@@ -111,9 +111,9 @@ let styleInjected = false;
 function injectStyle(doc) {
   if (styleInjected) return;
   const d = doc || document;
-  if (d.getElementById("character-editor-style")) { styleInjected = true; return; }
+  if (d.getElementById("avatarkit-editor-style")) { styleInjected = true; return; }
   const style = d.createElement("style");
-  style.id = "character-editor-style";
+  style.id = "avatarkit-editor-style";
   style.textContent = EDITOR_CSS;
   (d.head || d.documentElement).appendChild(style);
   styleInjected = true;
@@ -138,10 +138,10 @@ const DEFAULT_ACTIONS = ["randomize", "reset"];
  * Mount the editor into `container`.
  *
  * options:
- *   document      the character to start from (default: a fresh one)
+ *   document      the avatar to start from (default: a fresh one)
  *   onChange(doc) called after every edit, with a normalised document
  *   onSave(doc)   if given, a Save control appears; the host owns persistence
- *   storageKey    where saved presets live (default `character.presets`;
+ *   storageKey    where saved presets live (default `avatarkit.presets`;
  *                 null disables the saved-presets row entirely)
  *   shareBase     base URL for "Copy link" (default: the current page)
  *   showPreview   set false to render only the panel, e.g. beside a preview
@@ -268,7 +268,7 @@ export function mountEditor(container, options) {
   }
 
   if (opts.showPreview !== false) {
-    instance = createCharacter(frame, doc, {
+    instance = createAvatar(frame, doc, {
       draggable: true,
       // `replace: false` is load-bearing. The default empties the container,
       // and the container already holds the follow-cursor toggle and the toast
@@ -287,7 +287,7 @@ export function mountEditor(container, options) {
   /**
    * The controls under the preview.
    *
-   * Export and share are **opt-in**, via `actions`. A character is usually a
+   * Export and share are **opt-in**, via `actions`. An avatar is usually a
    * profile picture inside a product, and there "Download SVG / PNG 256 /
    * PNG 512 / Copy link" is four controls answering a question nobody asked —
    * they crowd out the two that matter, Surprise me and Reset. A host that
@@ -458,7 +458,7 @@ export function mountEditor(container, options) {
     return h("div", { class: "ce-legend" }, [icon(path), text]);
   }
 
-  /** A grid of character thumbnails, re-rendered only when its signature changes. */
+  /** A grid of avatar thumbnails, re-rendered only when its signature changes. */
   function thumbGrid(cls, items, build, isActive, onPick) {
     const grid = h("div", { class: `ce-grid ${cls}` });
     let signature = null;
@@ -716,7 +716,7 @@ export function mountEditor(container, options) {
   }
 
   /**
-   * A face thumbnail is a close-up, not a shrunken character.
+   * A face thumbnail is a close-up, not a shrunken avatar.
    *
    * At 50px a whole head leaves a few pixels of eye, and twelve of those are
    * indistinguishable — which is what the first version shipped. The fix that
@@ -807,7 +807,7 @@ export function mountEditor(container, options) {
         slider("Width", EL.outlineWidth, (s) => s.effects.outline.width, (s, v) => { s.effects.outline.width = v; }),
         slider("Opacity", EL.opacity, (s) => s.effects.outline.opacity, (s, v) => { s.effects.outline.opacity = v; }),
         toggle("Show seams between parts", (s) => s.effects.seams, (s, v) => { s.effects.seams = v; }),
-        h("p", { class: "ce-note" }, "Seams off draws one outline around the whole character instead of one per part."),
+        h("p", { class: "ce-note" }, "Seams off draws one outline around the whole avatar instead of one per part."),
       ]),
 
       h("div", { class: "ce-section" }, [
@@ -858,7 +858,7 @@ export function mountEditor(container, options) {
         slider("Zoom", VL.scale, (s) => s.view.scale, (s, v) => { s.view.scale = v; }),
         slider("Across", VL.positionX, (s) => s.view.positionX, (s, v) => { s.view.positionX = v; }),
         slider("Up and down", VL.positionY, (s) => s.view.positionY, (s, v) => { s.view.positionY = v; }),
-        h("p", { class: "ce-note" }, "Drag the preview to turn the character."),
+        h("p", { class: "ce-note" }, "Drag the preview to turn the avatar."),
       ]),
     );
   }
@@ -866,12 +866,12 @@ export function mountEditor(container, options) {
   // ── saved presets ────────────────────────────────────────────────────────
 
   function buildSavedPresets() {
-    const key = opts.storageKey === undefined ? "character.presets" : opts.storageKey;
+    const key = opts.storageKey === undefined ? "avatarkit.presets" : opts.storageKey;
     const row = h("div", { class: "ce-grid ce-grid-6" });
     const section = h("div", { class: "ce-section" }, [
       h("div", { class: "ce-row" }, [
         legend("Saved", ICON.star),
-        h("button", { class: "ce-icon-btn", type: "button", title: "Save this character",
+        h("button", { class: "ce-icon-btn", type: "button", title: "Save this avatar",
           onclick: () => { save(); render(); say("Saved"); } }, [icon(ICON.add)]),
       ]),
       row,
@@ -903,7 +903,7 @@ export function mountEditor(container, options) {
       const list = read();
       if (!list.length) {
         row.appendChild(h("p", { class: "ce-empty", style: "grid-column:1/-1" },
-          "Characters you save appear here."));
+          "Avatars you save appear here."));
         return;
       }
       list.forEach((payload, i) => {

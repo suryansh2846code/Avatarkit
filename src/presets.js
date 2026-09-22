@@ -1,5 +1,5 @@
 /**
- * The built-in characters.
+ * The built-in avatars.
  *
  * Each preset is a *partial* document: the parts and the face fields that make
  * it that creature, and nothing else. Palette, camera, effects and view come
@@ -187,7 +187,7 @@ export function applyPreset(doc, id) {
   next.scene.entity.preset = p.id;
   next.scene.entity.parts = JSON.parse(JSON.stringify(p.parts));
   next.scene.face = Object.assign({}, next.scene.face, p.face);
-  if (next.metadata.name === "Character" || BY_ID.has(slug(next.metadata.name))) {
+  if (next.metadata.name === "Avatar" || BY_ID.has(slug(next.metadata.name))) {
     next.metadata.name = p.name;
   }
   return next;

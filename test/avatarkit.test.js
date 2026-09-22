@@ -9,7 +9,7 @@
  * here, by stepping the controller by hand with a fake clock.
  *
  * The bias throughout is toward properties rather than golden values. "The
- * character fits in the frame at every angle" survives a deliberate change to
+ * avatar fits in the frame at every angle" survives a deliberate change to
  * the geometry; a checked-in path string does not, and a golden file that gets
  * re-baselined on every change is a file that tests nothing.
  */
@@ -19,6 +19,7 @@ import assert from "node:assert/strict";
 
 import {
   defaultScene, defaultPart, normalize, migrate, cloneScene, LIMITS,
+  SCHEMA_ID, LEGACY_SCHEMA_ID,
 } from "../src/index.js";
 import { encode, decode, fromURL, toURL } from "../src/codec.js";
 import { buildRenderModel } from "../src/project.js";
@@ -37,7 +38,7 @@ test("normalize survives anything and always returns a renderable document", () 
   for (const junk of [null, undefined, 0, "", [], "not a document", { scene: 7 },
     { scene: { entity: { parts: "nope" } } }, { scene: { view: { yaw: NaN } } }]) {
     const doc = normalize(junk);
-    assert.equal(doc.schema, "character.scene");
+    assert.equal(doc.schema, "avatarkit.scene");
     assert.ok(doc.scene.entity.parts.length >= 1, "a document always has a body");
     assert.ok(Number.isFinite(doc.scene.view.yaw));
     assert.doesNotThrow(() => renderToString(doc));
@@ -109,6 +110,42 @@ test("fromURL reads our key and the reference builder's", () => {
 
 // ── import from the reference format ───────────────────────────────────────
 
+/**
+ * The 0.2.0 rename, from the point of view of a link shared before it.
+ *
+ * `character.scene` and `avatarkit.scene` describe the same document — only the
+ * name changed — so a payload written under the old id has to come back whole,
+ * not merely without throwing. Asserting on the parts and the palette rather
+ * than on the schema string alone is the difference between "it migrated" and
+ * "it fell back to a default avatar and reported success".
+ */
+test("a document saved under the pre-rename schema id still loads whole", () => {
+  const before = generateScene("shared-before-the-rename");
+  const legacy = JSON.parse(JSON.stringify(before));
+  legacy.schema = LEGACY_SCHEMA_ID;
+
+  const after = normalize(migrate(legacy));
+
+  assert.equal(after.schema, SCHEMA_ID, "the old id is re-stamped, not passed through");
+  assert.equal(after.metadata.name, before.metadata.name);
+  assert.equal(after.scene.appearance.paletteId, before.scene.appearance.paletteId);
+  assert.deepEqual(after.scene.entity.parts, before.scene.entity.parts, "the body survives the rename");
+  assert.equal(renderToString(after, { idPrefix: "x" }), renderToString(before, { idPrefix: "x" }),
+    "it draws exactly what it drew before");
+});
+
+/** A link shared before the rename arrives as a payload, not as an object. */
+test("a link shared before the rename decodes to the same avatar", () => {
+  const before = generateScene("old-link");
+  const legacy = Object.assign(JSON.parse(JSON.stringify(before)), { schema: LEGACY_SCHEMA_ID });
+  const decoded = decode(encode(legacy));
+
+  assert.ok(decoded, "the payload decodes");
+  assert.equal(decoded.schema, SCHEMA_ID);
+  assert.equal(renderToString(decoded, { idPrefix: "x" }), renderToString(before, { idPrefix: "x" }));
+});
+
+
 test("an oneworks.avatar document imports with a body and its own crop", () => {
   const imported = normalize(migrate({
     schema: "oneworks.avatar",
@@ -123,7 +160,7 @@ test("an oneworks.avatar document imports with a body and its own crop", () => {
     },
   }));
 
-  assert.equal(imported.schema, "character.scene");
+  assert.equal(imported.schema, "avatarkit.scene");
   assert.equal(imported.scene.entity.parts.length, 1, "an empty part list becomes a body");
   assert.equal(imported.scene.entity.parts[0].shape, "capsule");
   assert.equal(imported.scene.appearance.background, "#ffc1a9", "the card colour moves to the background");
@@ -147,7 +184,7 @@ test("the same document renders byte-identically when the id prefix is pinned", 
 });
 
 /**
- * The same character, drawn twice on one page.
+ * The same avatar, drawn twice on one page.
  *
  * SVG ids are global to the document, not scoped to their `<svg>`. Two copies
  * of one `<filter id="x">` means the second SVG's `url(#x)` resolves into the
@@ -163,7 +200,7 @@ test("two renders of one document never share an id", () => {
   const ids = (svg) => [...svg.matchAll(/\bid="([^"]+)"/g)].map((m) => m[1]);
   const a = ids(renderToString(doc));
   const b = ids(renderToString(doc));
-  assert.ok(a.length > 0, "this character should define at least one id");
+  assert.ok(a.length > 0, "this avatar should define at least one id");
   for (const id of a) {
     assert.ok(!b.includes(id), `id "${id}" appeared in both renders`);
   }
@@ -198,7 +235,7 @@ test("every preset and every shape renders without throwing", () => {
 });
 
 /**
- * The auto-fit promise, stated as a test: whatever a character is built from
+ * The auto-fit promise, stated as a test: whatever an avatar is built from
  * and whichever way it is turned, all of it is inside the frame. This is the
  * assertion that a bounding-*sphere* fit buys, and a bounding-box fit could
  * never pass — it is only correct for the angle it was measured at.
@@ -223,7 +260,7 @@ test("every preset stays inside the frame at every angle", () => {
   }
 });
 
-test("the fit holds still while the character turns", () => {
+test("the fit holds still while the avatar turns", () => {
   const base = applyPreset(normalize(defaultScene()), "rabbit");
   const widths = [];
   for (let yaw = -1; yaw <= 1.0001; yaw += 0.25) {
@@ -235,11 +272,11 @@ test("the fit holds still while the character turns", () => {
   }
   // The fit factor itself is constant — it comes from a bounding sphere — so
   // the only variation left is perspective: parts genuinely move nearer and
-  // further as the character turns, and genuinely change size when they do.
+  // further as the avatar turns, and genuinely change size when they do.
   // That is the effect, not a bug. What must not happen is the *frame* being
-  // recomputed, which would make the whole character pump on every frame.
+  // recomputed, which would make the whole avatar pump on every frame.
   const spread = Math.max(...widths) - Math.min(...widths);
-  assert.ok(spread < 4, `the character resized by ${spread.toFixed(2)}px while turning`);
+  assert.ok(spread < 4, `the avatar resized by ${spread.toFixed(2)}px while turning`);
 });
 
 test("the face turns away and fades instead of being drawn through the head", () => {
@@ -298,7 +335,7 @@ test("a colour that is not a colour falls back instead of being emitted", () => 
 
 // ── generation ─────────────────────────────────────────────────────────────
 
-test("a seed always gives the same character, and different seeds do not", () => {
+test("a seed always gives the same avatar, and different seeds do not", () => {
   assert.deepEqual(generateScene("inbox"), generateScene("inbox"));
   assert.notDeepEqual(generateScene("inbox"), generateScene("launch"));
   // No clock, no randomness: two processes minutes apart must agree, all the
@@ -308,7 +345,7 @@ test("a seed always gives the same character, and different seeds do not", () =>
   assert.equal(renderToString(generateScene("stable"), pin), renderToString(generateScene("stable"), pin));
 });
 
-test("generated characters are distinguishable from each other", () => {
+test("generated avatars are distinguishable from each other", () => {
   const seen = new Map();
   const seeds = Array.from({ length: 200 }, (_, i) => `agent-${i}`);
   for (const seed of seeds) {
@@ -318,10 +355,10 @@ test("generated characters are distinguishable from each other", () => {
   }
   // Well over a hundred distinct silhouette-and-colour combinations, so two
   // agents side by side in a rail are very unlikely to collide.
-  assert.ok(seen.size > 100, `only ${seen.size} distinct characters in 200 seeds`);
+  assert.ok(seen.size > 100, `only ${seen.size} distinct avatars in 200 seeds`);
 });
 
-test("a generated character's face reads against its own body", () => {
+test("a generated avatar's face reads against its own body", () => {
   for (let i = 0; i < 120; i++) {
     const model = buildRenderModel(generateScene(`contrast-${i}`));
     if (!model.face) continue;
@@ -403,7 +440,7 @@ function settle(controller, seconds = 2) {
  * The follow tests assert on *this*, not on the sign of `pose.pitch`. Asserting
  * on the number only proves the controller agrees with itself about a
  * convention, and that is exactly how the pitch shipped inverted: the renderer
- * and the controller each did what they said, and the character looked up when
+ * and the controller each did what they said, and the avatar looked up when
  * you moved the pointer down. The face's position inside its own silhouette is
  * the thing a person actually sees.
  */
@@ -422,20 +459,20 @@ test("the head turns toward the pointer, and the drawn face proves it", async ()
   const c = new FollowController(el, { enabled: true, yawRange: 40, pitchRange: 24, blink: false }, null, 1);
   const rest = facePosition({});
 
-  _setPointer(1200, 400);            // right of the character
+  _setPointer(1200, 400);            // right of the avatar
   const right = facePosition(settle(c));
   assert.ok(right.x > rest.x + 2, `pointer right: the face went to ${right.x}, rest was ${rest.x}`);
   assert.ok(c.pose.eyeX > 0, "the eyes should travel with the head");
 
-  _setPointer(-400, 400);            // left of the character
+  _setPointer(-400, 400);            // left of the avatar
   const left = facePosition(settle(c));
   assert.ok(left.x < rest.x - 2, `pointer left: the face went to ${left.x}, rest was ${rest.x}`);
 
-  _setPointer(500, 1400);            // below the character
+  _setPointer(500, 1400);            // below the avatar
   const down = facePosition(settle(c));
   assert.ok(down.y > rest.y + 2, `pointer below: the face went to ${down.y}, rest was ${rest.y}`);
 
-  _setPointer(500, -800);            // above the character
+  _setPointer(500, -800);            // above the avatar
   const up = facePosition(settle(c));
   assert.ok(up.y < rest.y - 2, `pointer above: the face went to ${up.y}, rest was ${rest.y}`);
 
@@ -467,7 +504,7 @@ test("the head goes back to rest when the pointer stops moving", async () => {
   c.destroy();
 });
 
-test("switching follow off returns the character to its authored pose", async () => {
+test("switching follow off returns the avatar to its authored pose", async () => {
   const { _setPointer } = await import("../src/follow.js");
   const el = fakeElement({ left: 0, top: 0, width: 100, height: 100 });
   const poses = [];

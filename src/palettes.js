@@ -1,7 +1,7 @@
 /**
  * Colour is a palette, never a free-for-all.
  *
- * A character is four colours that have to work together — body, the outline
+ * An avatar is four colours that have to work together — body, the outline
  * around it, the face marks on top of it, and the card behind it. Exposed as
  * four independent colour pickers, almost every combination a person lands on
  * is unreadable: a mid-grey face on a mid-grey body, or an outline that
@@ -112,8 +112,8 @@ export function contrast(a, b) {
  * The readable ink for marks drawn on `bg`.
  *
  * Used as the last line of defence for face features: whatever palette or
- * custom body colour a person lands on, eyes that vanish into the head are a
- * character with no face, which reads as a failed render rather than a choice.
+ * custom body colour a person lands on, eyes that vanish into the head are an
+ * avatar with no face, which reads as a failed render rather than a choice.
  */
 export function readableInk(bg, dark = "#14161b", light = "#f6f7fa") {
   return contrast(bg, dark) >= contrast(bg, light) ? dark : light;

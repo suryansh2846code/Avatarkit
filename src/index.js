@@ -1,23 +1,23 @@
 /**
- * character — geometric 3D avatars in SVG.
+ * avatar — geometric 3D avatars in SVG.
  *
  * The whole public surface, in one place. Everything below is re-exported from
  * a module that does one job; nothing is defined here, so this file can be read
  * as the API and nothing else.
  *
- *   import { createCharacter, generateScene } from "character";
+ *   import { createAvatar, generateScene } from "avatarkit";
  *
- *   createCharacter("#avatar", generateScene("agent:inbox"));
+ *   createAvatar("#avatar", generateScene("agent:inbox"));
  *
- * That is the ninety-percent case: a seed in, a live character out, following
+ * That is the ninety-percent case: a seed in, a live avatar out, following
  * the cursor, with nothing stored and nothing configured.
  *
  * The rest of the surface exists for the other ten percent — an editor that
  * needs the limits table, a server that needs the SVG string without a DOM, a
- * host that needs to put a character in a URL.
+ * host that needs to put an avatar in a URL.
  */
 
-export { VERSION, SCHEMA_ID, UNIT, LIMITS, EYE_SHAPES, MOUTH_SHAPES, NOSE_SHAPES,
+export { VERSION, SCHEMA_ID, LEGACY_SCHEMA_ID, UNIT, LIMITS, EYE_SHAPES, MOUTH_SHAPES, NOSE_SHAPES,
   FRAMES, FITS, BACKGROUND_STYLES, PART_ROLES,
   defaultScene, defaultPart, normalize, migrate, cloneScene } from "./schema.js";
 
@@ -34,7 +34,7 @@ export { buildRenderModel, viewMatrix, VIEWBOX } from "./project.js";
 
 export { toSVG, toSVGBody, toDataURL } from "./svg.js";
 
-export { createCharacter, renderToString } from "./renderer.js";
+export { createAvatar, renderToString } from "./renderer.js";
 
 // `_setPointer` and `_activeCount` are test hooks, not API. A host that wants
 // to drive the pose itself should use `instance.setPose()` instead.

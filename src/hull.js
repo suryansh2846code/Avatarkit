@@ -5,7 +5,7 @@
  * it is the whole reason the renderer can be this small. The silhouette of a
  * convex solid under any projection is exactly the convex hull of its projected
  * surface points, so there is no mesh to cut, no hidden-line removal, and no
- * boolean geometry. Concave characters are built by *stacking* convex parts,
+ * boolean geometry. Concave avatars are built by *stacking* convex parts,
  * which is also how the reference tool does it: the faint seam across a cat's
  * face is one part's outline crossing another's fill.
  *

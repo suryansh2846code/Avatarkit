@@ -1,5 +1,5 @@
 /**
- * A character, alive in the DOM.
+ * An avatar, alive in the DOM.
  *
  * One `<svg>` element per instance, for the life of the instance. Nothing here
  * ever replaces the node: doing so breaks CSS transitions on it, drops focus,
@@ -16,7 +16,7 @@
  *
  * The instance owns three things and no more: the document, the pose, and the
  * element. Pose is not stored in the document — a head turned toward the cursor
- * is not an edit, and writing it back would mean every saved character carried
+ * is not an edit, and writing it back would mean every saved avatar carried
  * whatever angle it happened to be at when the page was closed.
  */
 
@@ -32,18 +32,18 @@ const round = (n) => Math.round(n * 100) / 100;
 let uid = 0;
 
 /**
- * Mount a character into `target`.
+ * Mount an avatar into `target`.
  *
  * `target` may be an element to render into, or an existing `<svg>` to take
  * over. Returns the instance; call `destroy()` when the host unmounts it, or
  * the follow loop keeps a reference to an element nobody can see.
  */
-export function createCharacter(target, document_, options) {
+export function createAvatar(target, document_, options) {
   const opts = options || {};
   const host = typeof target === "string"
     ? (typeof document !== "undefined" ? document.querySelector(target) : null)
     : target;
-  if (!host) throw new Error("createCharacter: target element not found");
+  if (!host) throw new Error("createAvatar: target element not found");
 
   const doc = normalize(document_);
   const id = `ch${++uid}`;
@@ -67,7 +67,7 @@ export function createCharacter(target, document_, options) {
       el.setAttribute("width", String(state.size));
       el.setAttribute("height", String(state.size));
     } else {
-      // The default is a character that fills whatever box CSS gives it. A
+      // The default is an avatar that fills whatever box CSS gives it. A
       // fixed pixel size inside a flex rail is the reason avatars stop lining
       // up the moment someone changes a row height.
       el.removeAttribute("width");
@@ -120,7 +120,7 @@ export function createCharacter(target, document_, options) {
    *
    * That invariant is load-bearing, and it was learned the hard way: this used
    * to run for *every* update, including document edits, so picking a different
-   * mouth in the editor changed the document, re-projected the character, and
+   * mouth in the editor changed the document, re-projected the avatar, and
    * then wrote only the things a pose can change — leaving the old mouth on
    * screen. The control worked, the render was correct, and nothing moved.
    *
@@ -164,7 +164,7 @@ export function createCharacter(target, document_, options) {
 
   /**
    * Redraw. `poseOnly` is a promise from the caller that nothing about the
-   * *document* changed — only where the character is looking.
+   * *document* changed — only where the avatar is looking.
    */
   function draw(poseOnly) {
     const model = buildRenderModel(state.doc, { pose: state.pose });
@@ -221,7 +221,7 @@ export function createCharacter(target, document_, options) {
       applyAttributes();
     },
 
-    /** The character as a standalone SVG file, at whatever size you ask for. */
+    /** The avatar as a standalone SVG file, at whatever size you ask for. */
     toSVGString(size) {
       return toSVG(buildRenderModel(state.doc), { size: size || state.size, title: state.title });
     },
@@ -235,7 +235,7 @@ export function createCharacter(target, document_, options) {
 }
 
 /**
- * Drag to turn the character, for the editor preview.
+ * Drag to turn the avatar, for the editor preview.
  *
  * Pointer capture rather than window listeners: a drag that leaves the element
  * must keep turning the head, and must stop when the button is released over
@@ -288,7 +288,7 @@ function attachDrag(el, state, draw, onChange) {
  * The id prefix has to be unique per *call*, not per document — and that
  * distinction cost a real bug. It was derived from a hash of the document,
  * which sounds better: identical input, identical output, byte for byte.
- * But SVG ids are document-global, and rendering the same character twice on
+ * But SVG ids are document-global, and rendering the same avatar twice on
  * one page is the common case, not the edge case — an agent appears in the rail
  * and again in a roster. Two `<filter id="s727496-shadow">` in one page means
  * `url(#s727496-shadow)` in the second SVG resolves to the *first* one's defs,
@@ -301,9 +301,9 @@ function attachDrag(el, state, draw, onChange) {
 let _stringUid = 0;
 
 /**
- * A character as an SVG string, with no DOM involved.
+ * An avatar as an SVG string, with no DOM involved.
  *
- * This is the one to reach for when a character is decoration rather than a
+ * This is the one to reach for when an avatar is decoration rather than a
  * participant — a list of thirty agents, an email, a static export. It costs
  * one projection pass and produces something the browser can cache as an image,
  * instead of thirty live instances competing for frames.

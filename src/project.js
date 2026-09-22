@@ -15,7 +15,7 @@
  * ── the coordinate systems, in order ────────────────────────────────────────
  *   local   unit box [-0.5, 0.5]^3, what `primitives.js` returns
  *   part    local * (width, height, depth) / 100 * UNIT, rotated, translated
- *   world   the character, roughly inside a ±150 box around the origin
+ *   world   the avatar, roughly inside a ±150 box around the origin
  *   view    world rotated by yaw / pitch / roll
  *   screen  projected, scaled, centred in a fixed 256-unit square
  *
@@ -50,7 +50,7 @@ const PIXELS_PER_UNIT = 1.7;
  * 350 and a rotated head starts to look like a fish-eye photograph of itself.
  *
  * It is also the number the auto-fit pays for. The fit has to reserve room for
- * the worst case — the outermost point of the character swung all the way
+ * the worst case — the outermost point of the avatar swung all the way
  * toward the camera — and that reservation is `FOCAL / (FOCAL - radius)`. At
  * 620 a rabbit's ear tip could grow by 22% on its way round, so either the fit
  * gave up a fifth of the frame permanently, or the ear clipped at some angles.
@@ -81,8 +81,8 @@ function persp(z) {
  *
  * `pose` is how the follow-cursor loop and any other live animation speak to
  * the renderer: it adds to the document's authored angles rather than replacing
- * them, so a character posed at a three-quarter angle still turns from *there*
- * toward the pointer. Replacing would make every character snap to front-on the
+ * them, so an avatar posed at a three-quarter angle still turns from *there*
+ * toward the pointer. Replacing would make every avatar snap to front-on the
  * moment the pointer moved, which is the bug that makes this feature feel
  * broken rather than alive.
  */
@@ -113,9 +113,9 @@ function projector(view, pose, unitScale) {
  *
  * This is the single most valuable cache in the package. A part's world points
  * depend only on its own fields — never on the camera, the view angle or the
- * pose — so while the follow loop turns a character sixty times a second, this
+ * pose — so while the follow loop turns an avatar sixty times a second, this
  * runs zero times. What is left in the hot path is one matrix multiply per
- * point plus the hull, which is what makes a rail of live characters affordable.
+ * point plus the hull, which is what makes a rail of live avatars affordable.
  *
  * Keyed on the part's JSON, because a part *is* its JSON: two parts that
  * serialise the same are the same geometry by definition.
@@ -137,11 +137,11 @@ function worldPoints(part) {
 }
 
 /**
- * The radius of the sphere around the origin that contains the whole character.
+ * The radius of the sphere around the origin that contains the whole avatar.
  *
  * Deliberately a sphere and not a box. The auto-fit below has to hold still
- * while the character turns — a fit computed from the projected bounding box
- * would rescale on every frame of a rotation, so the character would breathe in
+ * while the avatar turns — a fit computed from the projected bounding box
+ * would rescale on every frame of a rotation, so the avatar would breathe in
  * and out as it looked around. A bounding sphere is rotation-invariant, so the
  * fit is computed once per document and then never moves.
  */
@@ -370,7 +370,7 @@ function nosePath(face) {
  *
  * Pure: the same document and the same pose produce byte-identical output, on
  * any machine, with no clock and no randomness anywhere in the path. That is
- * what lets a character be cached by document hash, and what lets a test assert
+ * what lets an avatar be cached by document hash, and what lets a test assert
  * on a path string instead of on a screenshot.
  */
 export function buildRenderModel(doc, options) {
@@ -381,7 +381,7 @@ export function buildRenderModel(doc, options) {
   const cg = s.effects.colorGrade;
   const vm = viewMatrix(s.view, pose);
 
-  // Auto-fit. `view.scale` is a zoom *relative to a character that fits the
+  // Auto-fit. `view.scale` is a zoom *relative to an avatar that fits the
   // frame*, which is the only definition under which "1" means the same thing
   // to a compact blob and to a rabbit with ears twice its own height. Turning
   // fit off restores the absolute scale, and that is what an imported document
@@ -468,7 +468,7 @@ export function buildRenderModel(doc, options) {
   // Partly because it looks right, and partly because the live renderer patches
   // attributes in place: a feature that appears and disappears changes the
   // shape of the DOM, which forces a full rebuild — twice per blink, on every
-  // character on the page.
+  // avatar on the page.
   const highlights = f.eyeHighlight.enabled
     ? eyes.map((e) => ({
       x: e.x + (f.eyeHighlight.offsetX / 100) * f.width,

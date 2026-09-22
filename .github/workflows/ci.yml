@@ -1,6 +1,6 @@
 # Build the bundle, run the suite, and prove the committed `dist/` is current.
 #
-# That last step is the one worth having. `dist/character.global.js` is checked
+# That last step is the one worth having. `dist/avatarkit.global.js` is checked
 # in because it is what a `<script src>` user loads — so it can go stale in a
 # way nothing else notices. Rebuilding and diffing catches that on every push.
 name: ci
@@ -42,3 +42,22 @@ jobs:
             git --no-pager diff --stat -- dist ui/editor.css
             exit 1
           fi
+
+  # A separate job, deliberately. The suite above must stay installable-free —
+  # it is the one that proves the package has no dependencies. This one does
+  # need `tsc`, so it is kept where it cannot make that claim untrue, and where
+  # a registry hiccup fails the typecheck rather than the tests.
+  types:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # `types/*.d.ts` are hand-written against plain JavaScript, so nothing but
+      # this notices when a signature in `src/` moves and the declaration does
+      # not. `typetests/api.ts` imports by package name rather than by path,
+      # which checks the `exports` map and the `types` conditions with it.
+      - name: The declarations match the API
+        run: npx --yes -p typescript@5 tsc -p tsconfig.json

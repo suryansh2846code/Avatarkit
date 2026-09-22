@@ -1,25 +1,49 @@
-# character
+# Avatarkit
 
-Geometric 3D avatars in SVG. A document format, a renderer, a follow-the-cursor
-loop, and an editor — in about 60 kB, with **no dependencies** and no build step
-required to use it.
+[![npm](https://img.shields.io/npm/v/avatarkit?color=cb3837&logo=npm)](https://www.npmjs.com/package/avatarkit)
+[![CI](https://github.com/suryansh2846code/avatarkit/actions/workflows/ci.yml/badge.svg)](https://github.com/suryansh2846code/avatarkit/actions/workflows/ci.yml)
+[![gzip size](https://img.shields.io/badge/gzipped-58%20kB-success)](dist/avatarkit.global.js)
+[![dependencies](https://img.shields.io/badge/dependencies-0-success)](package.json)
+[![types](https://img.shields.io/badge/types-included-3178c6?logo=typescript&logoColor=white)](types/index.d.ts)
+[![licence](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
+
+**Geometric 3D avatars in SVG that watch your cursor.** A document format, a
+renderer, a follow loop and a full editor — **zero dependencies**, no build step,
+58 kB gzipped, free for anything under MIT.
 
 ```html
-<script src="character.global.js"></script>
+<script src="https://unpkg.com/avatarkit"></script>
 <div id="avatar" style="width:96px;height:96px"></div>
 <script>
-  Character.createCharacter("#avatar", Character.generateScene("agent:inbox"));
+  Avatarkit.createAvatar("#avatar", Avatarkit.generateScene("agent:inbox"));
 </script>
 ```
 
-That is the whole ninety-percent case: a seed in, a live character out, watching
+That is the whole ninety-percent case: a seed in, a live avatar out, watching
 the pointer, with nothing stored and nothing configured.
+
+## Why you might want it
+
+- **Never ship an empty avatar slot.** Any string — an email, a user id, an
+  agent name — is a stable, recognisable avatar, computed on the spot. No
+  uploads, no storage, no CDN, no broken-image icon.
+- **It is alive.** Avatars follow the pointer and blink, on one shared
+  `requestAnimationFrame` for the whole page — thirty of them cost one pointer
+  read per move, not thirty.
+- **Your users can edit theirs.** `mountEditor` is a complete avatar builder in
+  one function call, framework-free, themed with six CSS variables.
+- **An avatar is JSON.** Store it in one `TEXT` column, put it in a URL, render
+  it on a server, diff it in a pull request.
+- **Nothing to audit.** Zero dependencies, no lockfile, no supply chain, no
+  network calls at runtime. The whole thing is 3,000 lines you can read.
+- **TypeScript types included**, and 47 tests that assert on properties rather
+  than on checked-in golden values.
 
 ---
 
 ## What it actually is
 
-Characters are built from **convex 3D primitives** — spheres, capsules, rounded
+Avatars are built from **convex 3D primitives** — spheres, capsules, rounded
 boxes, cones, wedges — each with a position, a size, a depth and three rotations.
 Every frame, each part's surface points are rotated, projected through a pinhole
 camera, and reduced to a **convex hull**: the exact silhouette of a convex solid
@@ -28,7 +52,7 @@ outline, so a nearer part's outline lands across a farther part's fill and the
 join shows as a seam. That seam is the whole visual signature — it is what makes
 a cat read as a head with ears behind it rather than as a flat sticker.
 
-No mesh, no triangles, no hidden-surface removal, no WebGL. Concave characters
+No mesh, no triangles, no hidden-surface removal, no WebGL. Concave avatars
 are built by *stacking* convex parts, which is also the only shape vocabulary the
 editor exposes, so there is no privileged geometry a user cannot reach.
 
@@ -38,37 +62,61 @@ the same render model.
 
 ## Install
 
-Not on npm — the name `character` is already taken there. Install from git:
-
 ```bash
-npm install github:suryansh2846code/character
+npm install avatarkit
 ```
 
 ```js
-import { createCharacter, generateScene } from "character";
-import { mountEditor } from "character/editor";
+import { createAvatar, generateScene } from "avatarkit";
+import { mountEditor } from "avatarkit/editor";
 ```
 
-Or just take the one file. `dist/character.global.js` is committed, has no
+Types ship with the package — no `@types/` anything.
+
+Or take the one file. `dist/avatarkit.global.js` is committed, has no
 dependencies and needs no build step, so a `<script>` tag is a complete install:
 
 ```html
-<script src="character.global.js"></script>
+<!-- pin a version in production; unpkg serves the latest without one -->
+<script src="https://unpkg.com/avatarkit@0.2.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/avatarkit@0.2.0"></script>
 ```
+
+It exposes one global, `Avatarkit`, with the same surface as the module.
 
 Both ship the same code — the bundle is generated from `src/` by
 `scripts/build.js`, which is 200 lines and also has no dependencies. CI rebuilds
 it on every push and fails if the committed copy has drifted.
 
+### Frameworks
+
+There is no React or Vue package, and that is deliberate — a component that
+picks one framework picks a fight with the other three. The whole integration is
+a ref and an effect:
+
+```jsx
+function Avatar({ seed, size = 48 }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const inst = createAvatar(ref.current, generateScene(seed));
+    return () => inst.destroy();       // the follow loop drops the element here
+  }, [seed]);
+  return <div ref={ref} style={{ width: size, height: size }} />;
+}
+```
+
+For a list, reach for `renderToString` instead — a static string the browser can
+cache beats thirty live instances competing for frames.
+
 ## The document
 
-A character is a plain JSON object, and the renderer holds no state the document
+An avatar is a plain JSON object, and the renderer holds no state the document
 does not describe. That is what makes it shareable as a URL, storable as one
 `TEXT` column, and re-renderable years later at a size nobody has thought of yet.
 
 ```js
 {
-  schema: "character.scene",
+  schema: "avatarkit.scene",
   version: 1,
   metadata: { name: "Inbox" },
   scene: {
@@ -90,40 +138,40 @@ Three properties hold it up:
   newer version, and a hand-edited one with a string where a number belongs all
   come out complete and in range. It never throws and never returns null, because
   the two things that call it are "a URL someone pasted" and "a row read back from
-  disk", and both must degrade to a visible character rather than an error.
+  disk", and both must degrade to a visible avatar rather than an error.
 - **Colours are stored by palette id, not resolved.** A document written today
   picks up a palette fixed tomorrow.
 - **Unknown keys survive the round trip**, so an old tab cannot silently delete
   work done in a new one.
 
-`camera.fit: "contain"` means `view.scale` is a zoom *relative to a character
+`camera.fit: "contain"` means `view.scale` is a zoom *relative to an avatar
 that fits the frame* — the only definition under which `1` means the same thing
 to a compact blob and to a rabbit with ears twice its own height. The fit is
-computed from a bounding **sphere**, so it is rotation-invariant: the character
+computed from a bounding **sphere**, so it is rotation-invariant: the avatar
 never resizes as it turns, and it never leaves the frame at any angle.
 
 ## Following the cursor
 
 ```js
-createCharacter("#a", doc, { follow: { yawRange: 30, scope: "window" } });
+createAvatar("#a", doc, { follow: { yawRange: 30, scope: "window" } });
 ```
 
 One `pointermove` listener and one `requestAnimationFrame` loop for the whole
-page, shared by every character on it — a rail of thirty avatars costs one
+page, shared by every avatar on it — a rail of thirty avatars costs one
 pointer read per move, not thirty. The motion is a **damped spring**, so a
 pointer that changes direction mid-flight is followed from wherever the head
 currently is at whatever speed it currently has; every tween-based version felt
 like the head was catching up with a decision it had already made.
 
 The distance over which a head travels from rest to fully turned is clamped to
-a usable range rather than scaled purely off the character's own size. Derived
+a usable range rather than scaled purely off the avatar's own size. Derived
 from size alone, a 34px avatar reached full deflection 75 pixels away — so
 across a real window it sat pinned at its limit and flicked between extremes as
 the pointer crossed the centre line. It tracked perfectly and read as broken,
 because nothing in between was ever drawn.
 
-The pose is *added* to the document's authored angles, never substituted, so a
-character posed at a three-quarter angle turns from there rather than snapping
+The pose is *added* to the document's authored angles, never substituted, so an
+avatar posed at a three-quarter angle turns from there rather than snapping
 front-on the moment the pointer moves. And the pose is never written back to the
 document — a head turned toward the cursor is not an edit.
 
@@ -135,7 +183,7 @@ entirely** for a hidden tab, an off-screen element, or `prefers-reduced-motion`.
 ## Generating from a seed
 
 ```js
-generateScene("agent:inbox")        // the same character, every time, everywhere
+generateScene("agent:inbox")        // the same avatar, every time, everywhere
 generateScene(user.email, { palette: "indigo" })   // pin one axis, vary the rest
 randomScene()                       // "Surprise me" — the only Math.random here
 ```
@@ -163,7 +211,7 @@ pages, and a component that picks one of those picks a fight with the other
 three. Restyle the whole panel by setting six CSS custom properties on `.ce`.
 
 Export and share are **opt-in**. By default the controls under the preview are
-Surprise me and Reset; a character is usually a profile picture inside a
+Surprise me and Reset; an avatar is usually a profile picture inside a
 product, and there "Download SVG / PNG 256 / PNG 512 / Copy link" crowds out the
 two that matter. Ask for them when you want them:
 
@@ -187,17 +235,18 @@ cannot be wrong about what picking it does.
 
 | | |
 |---|---|
-| `createCharacter(target, doc, opts)` | mount a live character; returns `{ el, setDocument, setPose, setFollow, setSize, toSVGString, destroy }` |
+| `createAvatar(target, doc, opts)` | mount a live avatar; returns `{ el, setDocument, setPose, setFollow, setSize, toSVGString, destroy }` |
 | `renderToString(doc, {idPrefix})` | pass `idPrefix` when you need reproducible bytes; by default every call is unique, because SVG ids are document-global |
 | `renderToString(doc, opts)` | an SVG string with no DOM — for lists, exports, and servers |
-| `generateScene(seed, opts)` · `randomScene()` | compose a character |
+| `generateScene(seed, opts)` · `randomScene()` | compose an avatar |
 | `normalize(input)` · `defaultScene()` · `cloneScene(doc)` | documents |
-| `encode(doc)` · `decode(s)` · `fromURL(url)` · `toURL(doc, base)` | a character in a link |
+| `encode(doc)` · `decode(s)` · `fromURL(url)` · `toURL(doc, base)` | an avatar in a link |
 | `downloadSVG(doc)` · `downloadPNG(doc, size)` · `toPNGBlob(doc, size)` | export |
 | `mountEditor(container, opts)` | the editor panel |
+| `migrate(doc)` | documents from an older schema id or another producer |
 | `PRESETS` · `PALETTES` · `SHAPES` · `LIMITS` | what the editor builds itself from |
 
-`renderToString` is the one to reach for when a character is decoration rather
+`renderToString` is the one to reach for when an avatar is decoration rather
 than a participant. A live instance competes for frames; a string is something
 the browser can cache as an image.
 
@@ -208,6 +257,19 @@ PNG goes through `<img>` and `drawImage`, which works only because the renderer
 emits **nothing external** — no fonts, no images, no `xlink:href`. Anything added
 later that loads a resource taints the canvas and breaks PNG export without
 breaking the preview, which is a quietly nasty way to find out.
+
+## Compatibility
+
+`avatarkit` was called `character` before 0.2.0, and its schema id changed from
+`character.scene` to `avatarkit.scene` with it. Only the name changed: a
+document written under the old id is re-stamped on the way in, so links and
+database rows from before the rename keep working and keep drawing exactly what
+they drew. Two tests hold that promise. The old id is exported as
+`LEGACY_SCHEMA_ID` for hosts that want to find and rewrite their own stored
+rows; nothing ever writes it.
+
+The public API renamed with it — `createCharacter` is `createAvatar`, and the
+browser global `Character` is `Avatarkit`.
 
 ## Importing from the reference builder
 
@@ -220,13 +282,13 @@ and keep the framing they were shared with.
 ## Development
 
 ```bash
-git clone https://github.com/suryansh2846code/character.git
-cd character
+git clone https://github.com/suryansh2846code/avatarkit.git
+cd avatarkit
 ```
 
 ```bash
-node scripts/build.js         # -> dist/character.global.js and ui/editor.css
-node --test                   # 45 tests, no DOM, no browser
+node scripts/build.js         # -> dist/avatarkit.global.js and ui/editor.css
+node --test                   # 47 tests, no DOM, no browser
 open examples/standalone.html
 ```
 
@@ -238,7 +300,7 @@ inside `mountEditor` is a temporal-dead-zone `ReferenceError` that `node --check
 and a plain import both sail past.
 
 The suite is deliberately biased toward **properties over golden values**: "the
-character fits in the frame at every angle" survives a deliberate change to the
+avatar fits in the frame at every angle" survives a deliberate change to the
 geometry, and a checked-in path string does not. The follow loop's maths is
 asserted by stepping the controller with a fake clock rather than in a browser —
 headless Chrome runs exactly one frame of a `requestAnimationFrame` chain under

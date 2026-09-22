@@ -1,8 +1,8 @@
 /**
  * The document.
  *
- * A character is a plain JSON object and nothing else. The renderer holds no
- * state the document does not describe, which is what makes a character
+ * An avatar is a plain JSON object and nothing else. The renderer holds no
+ * state the document does not describe, which is what makes an avatar
  * shareable as a URL, storable as one TEXT column, diffable in review, and
  * re-renderable years later at a size nobody has thought of yet.
  *
@@ -32,7 +32,9 @@ import { clamp } from "./math.js";
 import { PALETTE_IDS } from "./palettes.js";
 import { SHAPES } from "./primitives.js";
 
-export const SCHEMA_ID = "character.scene";
+export const SCHEMA_ID = "avatarkit.scene";
+/** What `SCHEMA_ID` was before 0.2.0. Read, never written — see `migrate`. */
+export const LEGACY_SCHEMA_ID = "character.scene";
 export const VERSION = 1;
 
 /**
@@ -150,16 +152,16 @@ export function defaultPart(over) {
 }
 
 /**
- * The document a brand-new character starts from: one soft body, two eyes, no
+ * The document a brand-new avatar starts from: one soft body, two eyes, no
  * mouth, no nose. It is deliberately the plainest thing that still has a face —
  * a first screen with a fully-featured animal on it reads as "here is someone
- * else's character", not as "here is yours to build".
+ * else's avatar", not as "here is yours to build".
  */
 export function defaultScene() {
   return {
     schema: SCHEMA_ID,
     version: VERSION,
-    metadata: { name: "Character" },
+    metadata: { name: "Avatar" },
     scene: {
       appearance: {
         paletteId: "coral",
@@ -169,7 +171,7 @@ export function defaultScene() {
       camera: {
         size: 256,
         frame: "rounded",
-        // "contain" keeps the whole character in frame whatever it is built
+        // "contain" keeps the whole avatar in frame whatever it is built
         // from and whichever way it is turned; "none" is the absolute scale,
         // where composing a deliberate crop is the caller's job.
         fit: "contain",
@@ -182,7 +184,7 @@ export function defaultScene() {
         parts: [defaultPart({ id: "body", role: "body", shape: "rounded-box", round: 62, faceHost: true })],
       },
       face: {
-        // A character with no face at all is a legitimate design — a mark, a
+        // An avatar with no face at all is a legitimate design — a mark, a
         // token, a shape. It is also what the editor's shape thumbnails need,
         // and inventing a way to hide the face per-thumbnail instead of putting
         // it in the document is how a preview stops matching what it previews.
@@ -304,7 +306,7 @@ function normPart(src, i, defaults) {
  *
  * Total by design: it never throws and never returns null, because the two
  * things that call it are "a URL someone pasted" and "a row read back from
- * disk", and both of those must degrade to a visible character rather than to
+ * disk", and both of those must degrade to a visible avatar rather than to
  * an error surface. A document so broken that nothing survives comes out as
  * the default one.
  */
@@ -335,12 +337,12 @@ export function normalize(input) {
   const ent = src.entity || {};
   let parts = Array.isArray(ent.parts) ? ent.parts : [];
   // An empty part list is a real document that would render as nothing at all.
-  // The character that comes back is the default body, so a blank scene is a
+  // The avatar that comes back is the default body, so a blank scene is a
   // starting point rather than an empty frame the user has to diagnose.
   if (!parts.length) parts = b.entity.parts;
   parts = parts.slice(0, 24).map((p, i) => normPart(p, i));
   // Exactly one part carries the face. Two hosts would draw two faces; zero
-  // would draw none, and "my character lost its eyes" is the single most
+  // would draw none, and "my avatar lost its eyes" is the single most
   // alarming way this can fail.
   const hostIdx = parts.findIndex((p) => p.faceHost);
   parts.forEach((p, i) => { p.faceHost = i === (hostIdx >= 0 ? hostIdx : 0); });
@@ -442,7 +444,7 @@ export function normalize(input) {
   return {
     schema: SCHEMA_ID,
     version: VERSION,
-    metadata: { name: str(raw.metadata && raw.metadata.name, "Character").slice(0, 80) },
+    metadata: { name: str(raw.metadata && raw.metadata.name, "Avatar").slice(0, 80) },
     scene: Object.assign({}, src, {
       appearance, camera, entity: Object.assign({}, ent, { preset: str(ent.preset, "custom"), parts }),
       face, effects, lighting, follow, view,
@@ -452,9 +454,15 @@ export function normalize(input) {
 }
 
 /**
- * Documents from other producers, brought to this schema.
+ * Documents from other producers — and from our own older name — brought to
+ * this schema.
  *
- * Right now that means `oneworks.avatar` v1, the format the reference builder
+ * `avatarkit.scene` was called `character.scene` before 0.2.0. A document
+ * written under the old id is this schema in every other respect, so it is
+ * re-stamped rather than converted. Links shared before the rename keep
+ * working, which is the only reason the old id is still spelled out anywhere.
+ *
+ * The other producer is `oneworks.avatar` v1, the format the reference builder
  * puts in its share links. Most of its field names are already ours — the
  * shapes of `face`, `effects`, `camera` and `view` were kept deliberately
  * identical so importing one is mostly a matter of inventing the parts it never
@@ -465,6 +473,9 @@ export function normalize(input) {
  */
 export function migrate(input) {
   if (!input || typeof input !== "object") return input;
+  if (input.schema === LEGACY_SCHEMA_ID) {
+    return Object.assign({}, input, { schema: SCHEMA_ID, version: VERSION });
+  }
   if (input.schema !== "oneworks.avatar") return input;
 
   const src = input.scene || {};

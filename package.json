@@ -1,43 +1,57 @@
 {
-  "name": "character",
-  "version": "0.1.0",
-  "description": "Geometric 3D avatars in SVG: a document format, a renderer, a follow-the-cursor loop, and an editor. No dependencies, no build step required.",
+  "name": "avatarkit",
+  "version": "0.2.0",
+  "description": "Geometric 3D avatars in SVG that follow the cursor. A document format, a renderer, a follow loop and an editor — zero dependencies, no build step.",
   "license": "MIT",
   "author": "Suryansh Singh",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/suryansh2846code/character.git"
+    "url": "git+https://github.com/suryansh2846code/avatarkit.git"
   },
-  "homepage": "https://github.com/suryansh2846code/character#readme",
+  "homepage": "https://github.com/suryansh2846code/avatarkit#readme",
   "bugs": {
-    "url": "https://github.com/suryansh2846code/character/issues"
+    "url": "https://github.com/suryansh2846code/avatarkit/issues"
   },
   "keywords": [
     "avatar",
+    "avatars",
     "svg",
     "3d",
     "identicon",
-    "character",
+    "boring-avatars",
+    "profile-picture",
     "editor",
     "follow-cursor",
-    "profile-picture",
     "generative",
+    "placeholder",
     "zero-dependency"
   ],
   "type": "module",
+  "types": "./types/index.d.ts",
   "main": "./src/index.js",
   "module": "./src/index.js",
+  "unpkg": "./dist/avatarkit.global.js",
+  "jsdelivr": "./dist/avatarkit.global.js",
   "exports": {
-    ".": "./src/index.js",
-    "./editor": "./ui/editor.js",
+    ".": {
+      "types": "./types/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./editor": {
+      "types": "./types/editor.d.ts",
+      "default": "./ui/editor.js"
+    },
     "./editor.css": "./ui/editor.css",
-    "./global": "./dist/character.global.js"
+    "./global": "./dist/avatarkit.global.js",
+    "./package.json": "./package.json"
   },
   "files": [
     "src",
     "ui",
     "dist",
+    "types",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "sideEffects": [
@@ -46,9 +60,14 @@
   "scripts": {
     "build": "node scripts/build.js",
     "test": "node --test",
-    "check": "node scripts/build.js && node --test"
+    "check": "node scripts/build.js && node --test && npm run typecheck",
+    "typecheck": "npx --yes -p typescript@5 tsc -p tsconfig.json",
+    "prepublishOnly": "node scripts/build.js && node --test"
   },
   "engines": {
     "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

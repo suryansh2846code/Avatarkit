@@ -1,5 +1,5 @@
 /**
- * A character as a string you can put in a URL.
+ * An avatar as a string you can put in a URL.
  *
  * Base64url over UTF-8 JSON. Not compressed: a full document is around 1.4 kB
  * of JSON and roughly 1.9 kB encoded, which is inside every URL limit that
@@ -9,7 +9,7 @@
  * `decode()` never throws. The thing on the other end of it is a URL a person
  * pasted, and a pasted URL is truncated, re-encoded by a chat client, or from a
  * different tool about half the time. A bad payload returns null and the caller
- * falls back to a default character; it does not put a stack trace on screen.
+ * falls back to a default avatar; it does not put a stack trace on screen.
  */
 
 import { normalize } from "./schema.js";
@@ -75,7 +75,7 @@ export function decode(payload) {
 }
 
 /**
- * Read a character out of a URL, wherever it is hiding.
+ * Read an avatar out of a URL, wherever it is hiding.
  *
  * `d` is what the reference builder uses and what every link in the wild
  * carries; `c` is ours. Query string first, then the hash — a hash payload
@@ -109,7 +109,7 @@ export function fromURL(url, keys = ["c", "d"]) {
   return null;
 }
 
-/** Put a character into a URL, replacing any character already in it. */
+/** Put an avatar into a URL, replacing any avatar already in it. */
 export function toURL(doc, base, key = "c") {
   const payload = encode(doc);
   try {

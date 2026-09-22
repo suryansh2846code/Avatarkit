@@ -22,7 +22,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const BUNDLE = join(here, "..", "dist", "character.global.js");
+const BUNDLE = join(here, "..", "dist", "avatarkit.global.js");
 
 test("the editor module imports without a DOM", async () => {
   // Nothing at module scope may touch `document` — a host that imports the
@@ -146,16 +146,16 @@ test("the editor mounts, builds every tab, and accepts an edit", async () => {
 
 test("the built bundle evaluates and exposes the public surface", () => {
   if (!existsSync(BUNDLE)) {
-    assert.fail("dist/character.global.js is missing — run scripts/build.js");
+    assert.fail("dist/avatarkit.global.js is missing — run scripts/build.js");
   }
   const require_ = createRequire(import.meta.url);
-  const Character = require_(BUNDLE);
+  const Avatarkit = require_(BUNDLE);
 
-  for (const name of ["createCharacter", "renderToString", "generateScene", "mountEditor",
+  for (const name of ["createAvatar", "renderToString", "generateScene", "mountEditor",
     "normalize", "encode", "decode", "applyPreset", "PALETTES", "PRESETS"]) {
-    assert.ok(Character[name], `the bundle does not export ${name}`);
+    assert.ok(Avatarkit[name], `the bundle does not export ${name}`);
   }
   // And it works, not just exists.
-  const svg = Character.renderToString(Character.generateScene("bundle"), { size: 64 });
+  const svg = Avatarkit.renderToString(Avatarkit.generateScene("bundle"), { size: 64 });
   assert.ok(svg.startsWith("<svg") && svg.includes("<path"), "the bundled renderer drew nothing");
 });

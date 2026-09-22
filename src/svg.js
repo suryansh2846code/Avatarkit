@@ -10,11 +10,11 @@
  * Two things this file is careful about:
  *
  * **Ids.** SVG ids are document-global, not scoped to their `<svg>`. Two
- * characters on one page both calling their blur filter `blur` means the second
+ * avatars on one page both calling their blur filter `blur` means the second
  * one silently takes the first one's settings. Every id here is prefixed, and
  * the renderer hands each live instance a distinct prefix.
  *
- * **Escaping.** Colours and the character's name reach the markup from user
+ * **Escaping.** Colours and the avatar's name reach the markup from user
  * input and from a pasted URL. They are escaped on the way in, not trusted
  * because they "came from a colour picker" — the same document also arrives
  * from `decode()`, where nothing came from a picker at all.
@@ -125,11 +125,11 @@ function backgroundMarkup(model, size, ids) {
  * **Seams on** (the default): each part paints its own fill and then its own
  * outline. A nearer part's outline lands on top of a farther part's fill, so
  * the join between an ear and a head is a visible line — the same line the
- * reference draws across a cat's face. The character reads as assembled solids.
+ * reference draws across a cat's face. The avatar reads as assembled solids.
  *
  * **Seams off**: every silhouette is painted in the outline colour first, then
  * every fill goes over the top. Only the outermost contour survives, so the
- * character reads as one cut-out shape. Costs a second pass over the parts.
+ * avatar reads as one cut-out shape. Costs a second pass over the parts.
  */
 function bodyMarkup(model, hook) {
   const out = model.outline;
@@ -189,7 +189,7 @@ function faceMarkup(face, hook) {
  * Split out from `toSVG` because the live renderer sets attributes once and
  * then only ever replaces `innerHTML`. Rebuilding the root element on every
  * pointer move is what made the first version of the follow-cursor loop drop
- * frames on a page with a dozen characters on it.
+ * frames on a page with a dozen avatars on it.
  */
 export function toSVGBody(model, options) {
   const opts = options || {};
@@ -240,7 +240,7 @@ export function toSVGBody(model, options) {
 /**
  * Model -> a complete, standalone SVG document.
  *
- * `role="img"` with a `<title>` rather than a bare graphic: a character is a
+ * `role="img"` with a `<title>` rather than a bare graphic: an avatar is a
  * person's or an agent's identity, and a screen reader landing on an unlabelled
  * `<svg>` announces nothing at all.
  */

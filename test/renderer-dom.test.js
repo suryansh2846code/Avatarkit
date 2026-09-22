@@ -3,14 +3,14 @@
  *
  * Obvious, and it was broken. The live renderer has a fast path that writes
  * attributes onto existing nodes instead of rebuilding the subtree, which is
- * what keeps a rail of characters at 60fps while they follow the cursor. But
+ * what keeps a rail of avatars at 60fps while they follow the cursor. But
  * that path only writes what a *pose* can change — and it was running for every
  * update, including edits. So choosing a different mouth in the editor updated
- * the document, re-projected the character, and then wrote only the parts and
+ * the document, re-projected the avatar, and then wrote only the parts and
  * the eyes: the old mouth stayed on screen. Every control "worked" and nothing
  * moved.
  *
- * These tests drive `createCharacter` against a fake DOM and assert on the
+ * These tests drive `createAvatar` against a fake DOM and assert on the
  * markup it actually produced. They are deliberately about *visible output*
  * rather than about which internal path ran, because the bug was invisible to
  * anything that asked the renderer what it thought it had done.
@@ -19,7 +19,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { createCharacter } from "../src/renderer.js";
+import { createAvatar } from "../src/renderer.js";
 import { normalize, defaultScene } from "../src/schema.js";
 import { MOUTH_SHAPES, NOSE_SHAPES } from "../src/schema.js";
 
@@ -59,7 +59,7 @@ function withDOM(fn) {
 
 function mount(doc) {
   const host = el("div");
-  const instance = createCharacter(host, doc);
+  const instance = createAvatar(host, doc);
   return { instance, html: () => instance.el.innerHTML };
 }
 

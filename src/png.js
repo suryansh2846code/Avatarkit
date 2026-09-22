@@ -24,7 +24,7 @@ import { normalize } from "./schema.js";
  *
  * `size` is the pixel size of the square. A blob URL rather than a data URL for
  * the source image: Safari refuses to load large `data:` URLs into an `<img>`,
- * and a 1024px character with a long path list clears that limit.
+ * and a 1024px avatar with a long path list clears that limit.
  */
 export function svgToPNGBlob(svgString, size) {
   return new Promise((resolve, reject) => {
@@ -59,7 +59,7 @@ export function svgToPNGBlob(svgString, size) {
   });
 }
 
-/** A character document straight to a PNG blob at `size` pixels. */
+/** An avatar document straight to a PNG blob at `size` pixels. */
 export function toPNGBlob(doc, size) {
   const normalised = normalize(doc);
   const px = size || normalised.scene.camera.size;
@@ -88,14 +88,14 @@ export function downloadBlob(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-/** Download a character as `.svg`. */
+/** Download an avatar as `.svg`. */
 export function downloadSVG(doc, filename, size) {
   const normalised = normalize(doc);
   const svg = toSVG(buildRenderModel(normalised), { size: size || normalised.scene.camera.size, idPrefix: "x" });
   downloadBlob(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }), filename || `${safeName(normalised)}.svg`);
 }
 
-/** Download a character as `.png` at `size` pixels. */
+/** Download an avatar as `.png` at `size` pixels. */
 export function downloadPNG(doc, size, filename) {
   const normalised = normalize(doc);
   const px = size || 512;
@@ -106,7 +106,7 @@ export function downloadPNG(doc, size, filename) {
 }
 
 function safeName(doc) {
-  const n = String((doc.metadata && doc.metadata.name) || "character")
+  const n = String((doc.metadata && doc.metadata.name) || "avatar")
     .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-  return n || "character";
+  return n || "avatar";
 }

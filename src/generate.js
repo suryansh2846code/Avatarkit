@@ -1,9 +1,9 @@
 /**
- * A character from a seed.
+ * An avatar from a seed.
  *
  * The point of this file is that nobody should ever see an empty avatar slot.
  * Hand it an agent id, a username, an email, and it returns a complete,
- * distinct, deliberately-composed character — the same one, every time, on
+ * distinct, deliberately-composed avatar — the same one, every time, on
  * every machine, with nothing stored anywhere.
  *
  * Deterministic all the way down. `Math.random` appears exactly once in this
@@ -36,7 +36,7 @@ const BODY_POOL = [
 ];
 
 /**
- * Compose a character for `seed`.
+ * Compose an avatar for `seed`.
  *
  * `options.palette` pins the palette (for a host with its own brand colours),
  * `options.preset` pins the body, and `options.name` sets the document name —
@@ -53,7 +53,7 @@ export function generateScene(seed, options) {
   const pal = opts.palette || pick(next, PALETTES).id;
 
   let doc = defaultScene();
-  doc.metadata.name = opts.name || String(seed || "Character").slice(0, 80);
+  doc.metadata.name = opts.name || String(seed || "Avatar").slice(0, 80);
   doc.scene.appearance.paletteId = pal;
   doc = applyPreset(doc, presetId);
   if (opts.name) doc.metadata.name = opts.name;
@@ -92,7 +92,7 @@ export function generateScene(seed, options) {
     f.mouthY = pickInt(next, 40, 62);
   }
 
-  // A character looking slightly off-axis is alive; one looking straight down
+  // An avatar looking slightly off-axis is alive; one looking straight down
   // the barrel is a passport photo. The range stays inside what the follow
   // loop can turn back through, so it never looks stuck.
   const v = doc.scene.view;
@@ -107,11 +107,11 @@ export function generateScene(seed, options) {
   return normalize(doc);
 }
 
-/** "Surprise me": a character nobody has seen, including us. */
+/** "Surprise me": an avatar nobody has seen, including us. */
 export function randomScene(options) {
   const seed = `${Math.random()}-${Math.random()}`;
-  const doc = generateScene(seed, Object.assign({ name: "Character" }, options));
-  doc.metadata.name = (options && options.name) || "Character";
+  const doc = generateScene(seed, Object.assign({ name: "Avatar" }, options));
+  doc.metadata.name = (options && options.name) || "Avatar";
   return doc;
 }
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>character — avatar builder</title>
+<title>Avatarkit — avatar builder</title>
 <style>
   :root { color-scheme: dark; }
   body {
@@ -27,8 +27,8 @@
 </head>
 <body>
 <header>
-  <h1>character</h1>
-  <p class="lede">Move your pointer around the page — every character below is watching it.</p>
+  <h1>Avatarkit</h1>
+  <p class="lede">Move your pointer around the page — every avatar below is watching it.</p>
 </header>
 
 <main>
@@ -38,7 +38,7 @@
   </section>
 
   <section>
-    <h2>Generated from a seed — the same string always gives the same character</h2>
+    <h2>Generated from a seed — the same string always gives the same avatar</h2>
     <div class="rail" id="rail"></div>
   </section>
 
@@ -48,13 +48,13 @@
   </section>
 </main>
 
-<script src="../dist/character.global.js"></script>
+<script src="../dist/avatarkit.global.js"></script>
 <script>
-  // A character in the URL wins, so a shared link opens on what was shared.
-  const shared = Character.fromURL(location.href);
+  // An avatar in the URL wins, so a shared link opens on what was shared.
+  const shared = Avatarkit.fromURL(location.href);
 
-  Character.mountEditor("#editor", {
-    document: shared || Character.generateScene("character"),
+  Avatarkit.mountEditor("#editor", {
+    document: shared || Avatarkit.generateScene("avatarkit"),
     shareBase: location.href.split("?")[0],
   });
 
@@ -69,17 +69,17 @@
     cap.textContent = seed;
     fig.append(slot, cap);
     rail.appendChild(fig);
-    Character.createCharacter(slot, Character.generateScene(seed), { title: seed });
+    Avatarkit.createAvatar(slot, Avatarkit.generateScene(seed), { title: seed });
   }
 
   const sizes = document.getElementById("sizes");
-  const one = Character.generateScene("one document");
+  const one = Avatarkit.generateScene("one document");
   for (const px of [28, 40, 64, 96, 144]) {
     const box = document.createElement("div");
     box.style.width = px + "px";
     box.style.height = px + "px";
     sizes.appendChild(box);
-    Character.createCharacter(box, one, { title: "Sized " + px });
+    Avatarkit.createAvatar(box, one, { title: "Sized " + px });
   }
 </script>
 </body>

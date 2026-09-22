@@ -1,0 +1,14 @@
+{
+  "//": "Only here to typecheck types/*.d.ts against typetests/api.ts. The package itself is plain JavaScript with no build step; nothing in src/ or ui/ is compiled.",
+  "compilerOptions": {
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": false,
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
+    "lib": ["ES2022", "DOM"],
+    "types": []
+  },
+  "files": ["types/index.d.ts", "types/editor.d.ts", "typetests/api.ts"]
+}
