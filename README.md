@@ -15,7 +15,7 @@
 renderer, a follow loop and a full editor — **zero dependencies**, no build step,
 58 kB gzipped, free for anything under MIT.
 
-**[→ Try it live](https://suryansh2846code.github.io/Avatarkit/)** — build a
+**[→ Try it live](https://avatarkit.suryanshdev.xyz/)** — build a
 character in the browser, export it, or copy a link that reopens it.
 
 ```html
