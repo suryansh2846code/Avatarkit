@@ -1,4 +1,8 @@
-# Avatarkit
+<p align="center">
+  <img src="https://raw.githubusercontent.com/suryansh2846code/Avatarkit/main/docs/media/banner.png" width="820" alt="Avatarkit — avatars that watch your cursor">
+</p>
+
+<h1 align="center">Avatarkit</h1>
 
 [![npm](https://img.shields.io/npm/v/avatarkit?color=cb3837&logo=npm)](https://www.npmjs.com/package/avatarkit)
 [![CI](https://github.com/suryansh2846code/avatarkit/actions/workflows/ci.yml/badge.svg)](https://github.com/suryansh2846code/avatarkit/actions/workflows/ci.yml)
@@ -191,6 +195,8 @@ generateScene(user.email, { palette: "indigo" })   // pin one axis, vary the res
 randomScene()                       // "Surprise me" — the only Math.random here
 ```
 
+<img src="https://raw.githubusercontent.com/suryansh2846code/Avatarkit/main/docs/media/gallery.png" width="820" alt="Twelve avatars, each captioned with the string that produced it">
+
 Nobody should ever see an empty avatar slot. `generateScene` is deterministic all
 the way down — no clock, no randomness — because an identity that changes on
 refresh is not an identity. Variation is narrow where recognition lives (body
@@ -208,6 +214,8 @@ mountEditor("#editor", {
   shareBase: location.href,
 });
 ```
+
+<img src="https://raw.githubusercontent.com/suryansh2846code/Avatarkit/main/docs/media/editor.png" width="820" alt="The Avatarkit editor: a live preview beside shape, face, colour and effect controls">
 
 Framework-free — it gets dropped into React, Vue, Django templates and plain
 pages, and a component that picks one of those picks a fight with the other
